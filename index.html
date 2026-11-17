@@ -28,6 +28,8 @@ try{const old=JSON.parse(localStorage.getItem('turboRidgeSaveV2'));if(old)save={
 function persist(){localStorage.setItem('turboRidgeSaveV2',JSON.stringify(save));refreshHud()}
 let mode='menu',W=1280,H=720,dpr=1,car={x:120,y:300,vx:0,vy:0,a:0,va:0},camera=0,terrain=[],coins=[],fuel=100,runCoins=0,distance=0,last=0,keys={gas:false,brake:false},grounded=false;
 function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener('resize',resize);resize();
+const vehicleSpecs=[{power:1,top:8.8,mass:1,shape:0},{power:1.12,top:10.2,mass:.86,shape:1},{power:.94,top:8.2,mass:1.14,shape:2},{power:1.08,top:7.8,mass:1.28,shape:3},{power:1.02,top:8.6,mass:1.08,shape:4}];
+function specForCar(){return vehicleSpecs[save.car%vehicleSpecs.length]}
 function hash(n){let x=Math.sin(n*127.1+save.map*91.7)*43758.5453;return x-Math.floor(x)}
 function ground(x){let s=save.map;return H*.65+Math.sin(x*.003+s)*H*.07+Math.sin(x*.009+s*2)*H*.025+Math.sin(x*.0012+s*4)*H*.035}
 function makeWorld(){terrain=[];coins=[];for(let x=0;x<90000;x+=24){terrain.push({x,y:ground(x)});if(x>260&&hash(Math.floor(x/24)+save.map*100)>.83)coins.push({x,y:ground(x)-48,got:false,type:hash(x)>0.92?'fuel':'coin'})}}
