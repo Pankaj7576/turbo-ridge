@@ -15,13 +15,15 @@
             align-items: center;
             height: 100vh;
             overflow: hidden;
+            overscroll-behavior: none;
         }
         /* 16:9 Aspect Ratio Container */
         #game-container {
-            width: 100vw;
-            height: 100vh;
+            width: min(100vw, 177.7778vh);
+            height: min(100vh, 56.25vw);
             max-width: 1280px;
             max-height: 720px;
+            aspect-ratio: 16 / 9;
             background: #111;
             position: relative;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
@@ -35,6 +37,7 @@
             width: 100%;
             height: 100%;
             background: linear-gradient(to bottom, #4a90e2, #f5a623);
+            touch-action: none;
         }
         /* HUD Overlays */
         .hud-overlay {
@@ -96,6 +99,8 @@
             font-weight: bold;
             color: #fff;
             user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
             cursor: pointer;
             transition: background 0.1s;
         }
@@ -161,7 +166,9 @@
             border: 2px solid #f1c40f;
             padding: 30px;
             border-radius: 15px;
-            width: 500px;
+            width: min(500px, calc(100% - 24px));
+            max-height: calc(100% - 24px);
+            overflow-y: auto;
             z-index: 20;
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
@@ -315,29 +322,35 @@
     let keys = { gas: false, brake: false };
 
     window.addEventListener("keydown", e => {
-        if (e.key === "ArrowRight" || e.key === "d") keys.gas = true;
-        if (e.key === "ArrowLeft" || e.key === "a") keys.brake = true;
+        if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") { keys.gas = true; e.preventDefault(); }
+        if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") { keys.brake = true; e.preventDefault(); }
     });
     window.addEventListener("keyup", e => {
-        if (e.key === "ArrowRight" || e.key === "d") keys.gas = false;
-        if (e.key === "ArrowLeft" || e.key === "a") keys.brake = false;
+        if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") keys.gas = false;
+        if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") keys.brake = false;
     });
 
     // Touch Button Bindings
     const btnGas = document.getElementById("btn-gas");
     const btnBrake = document.getElementById("btn-brake");
 
-    btnGas.addEventListener("touchstart", () => keys.gas = true);
-    btnGas.addEventListener("touchend", () => keys.gas = false);
-    btnGas.addEventListener("mousedown", () => keys.gas = true);
-    btnGas.addEventListener("mouseup", () => keys.gas = false);
-
-    btnBrake.addEventListener("touchstart", () => keys.brake = true);
-    btnBrake.addEventListener("touchend", () => keys.brake = false);
-    btnBrake.addEventListener("mousedown", () => keys.brake = true);
-    btnBrake.addEventListener("mouseup", () => keys.brake = false);
+    function bindHoldButton(button, key) {
+        const press = event => { event.preventDefault(); keys[key] = true; button.classList.add("active"); };
+        const release = event => { if (event) event.preventDefault(); keys[key] = false; button.classList.remove("active"); };
+        button.addEventListener("pointerdown", press);
+        button.addEventListener("pointerup", release);
+        button.addEventListener("pointercancel", release);
+        button.addEventListener("lostpointercapture", release);
+        button.addEventListener("contextmenu", event => event.preventDefault());
+        window.addEventListener("pointerup", release);
+        window.addEventListener("blur", release);
+    }
+    bindHoldButton(btnGas, "gas");
+    bindHoldButton(btnBrake, "brake");
 
     function startGame() {
+        keys.gas = false; keys.brake = false;
+        closeGarage(); closeRewardsModal();
         document.getElementById("menu-screen").classList.add("hidden");
         document.getElementById("gameover-screen").classList.add("hidden");
         document.getElementById("hud").classList.remove("hidden");
@@ -355,6 +368,8 @@
     }
 
     function returnToMenu() {
+        keys.gas = false; keys.brake = false;
+        closeGarage(); closeRewardsModal();
         document.getElementById("gameover-screen").classList.add("hidden");
         document.getElementById("hud").classList.add("hidden");
         document.getElementById("touch-controls").classList.add("hidden");
@@ -462,6 +477,7 @@
     }
 
     function gameOver() {
+        keys.gas = false; keys.brake = false;
         gameState = "GAMEOVER";
         document.getElementById("hud").classList.add("hidden");
         document.getElementById("touch-controls").classList.add("hidden");
