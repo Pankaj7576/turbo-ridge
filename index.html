@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turbo Ridge: Offroad Climb - Real Money Edition</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #0b0f19;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        /* 16:9 Aspect Ratio Container */
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            max-width: 1280px;
+            max-height: 720px;
+            background: #111;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            border: 2px solid #222;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #4a90e2, #f5a623);
+        }
+        /* HUD Overlays */
+        .hud-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+        .hud-box {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            gap: 15px;
+        }
+        .fuel-container {
+            width: 200px;
+            height: 20px;
+            background: #444;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #fff;
+        }
+        #fuel-bar {
+            width: 100%;
+            height: 100%;
+            background: #2ecc71;
+            transition: width 0.1s linear;
+        }
+        /* On-Screen Touch Controls */
+        .controls-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+        .control-btn {
+            pointer-events: auto;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+            user-select: none;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .control-btn:active, .control-btn.active {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(0.95);
+        }
+        /* UI Screens & Menus */
+        .screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 14, 23, 0.92);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        .screen h1 {
+            font-size: 48px;
+            color: #f1c40f;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .screen p {
+            font-size: 18px;
+            color: #ccc;
+            margin-bottom: 30px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            border: none;
+            padding: 14px 35px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(230, 126, 34, 0.4);
+            transition: 0.2s;
+            margin: 10px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(230, 126, 34, 0.6);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+        .btn-ad {
+            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+            box-shadow: 0 5px 15px rgba(142, 68, 173, 0.4);
+        }
+        /* Modal Popups */
+        .modal {
+            display: none;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a2238;
+            border: 2px solid #f1c40f;
+            padding: 30px;
+            border-radius: 15px;
+            width: 500px;
+            z-index: 20;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .modal input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            background: #0b0f19;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .close-modal {
+            position: absolute;
+            top: 10px; right: 15px;
+            font-size: 24px;
+            color: #aaa;
+            cursor: pointer;
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas" width="1280" height="720"></canvas>
+
+    <!-- In-Game HUD -->
+    <div id="hud" class="hud-overlay hidden">
+        <div class="hud-box">
+            <span>🪙 Coins: <strong id="score-val">0</strong></span>
+            <span>💵 Cash: <strong id="cash-val">$0.00</strong></span>
+        </div>
+        <div class="hud-box">
+            <span>⛽ Fuel:</span>
+            <div class="fuel-container">
+                <div id="fuel-bar"></div>
+            </div>
+        </div>
+        <div class="hud-box">
+            <button class="btn" style="padding: 5px 15px; font-size: 14px;" onclick="openGarage()">Garage</button>
+        </div>
+    </div>
+
+    <!-- On-Screen Touch Pedals -->
+    <div id="touch-controls" class="controls-overlay hidden">
+        <div id="btn-brake" class="control-btn">◀ REV</div>
+        <div id="btn-gas" class="control-btn">GAS ▶</div>
+    </div>
+
+    <!-- Main Menu Screen -->
+    <div id="menu-screen" class="screen">
+        <h1>Turbo Ridge</h1>
+        <p>Offroad Hill Climb & Real Earnings</p>
+        <button class="btn" onclick="startGame()">Play Game</button>
+        <button class="btn btn-secondary" onclick="openGarage()">Garage & Upgrades</button>
+        <button class="btn btn-ad" onclick="openRewardsModal()">🎁 Rewards & Cashout</button>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameover-screen" class="screen hidden">
+        <h1 style="color: #e74c3c;">Game Over</h1>
+        <p>Out of Fuel or Crashed!</p>
+        <p>Coins Earned: <span id="final-score">0</span></p>
+        <button class="btn" onclick="startGame()">Try Again</button>
+        <button class="btn btn-secondary" onclick="returnToMenu()">Main Menu</button>
+    </div>
+
+    <!-- Garage Modal -->
+    <div id="garage-modal" class="modal">
+        <span class="close-modal" onclick="closeGarage()">&times;</span>
+        <h2>Vehicle Garage</h2>
+        <p>Upgrade your ride for better climbs!</p>
+        <div style="margin: 20px 0; text-align: left; display: flex; flex-direction: column; gap: 10px;">
+            <div>Engine Level: <span id="lvl-engine">1</span> <button class="btn" style="padding: 5px 10px; font-size: 14px; float: right;" onclick="upgrade('engine')">Upgrade ($50)</button></div>
+            <div>Suspension Level: <span id="lvl-suspension">1</span> <button class="btn" style="padding: 5px 10px; font-size: 14px; float: right;" onclick="upgrade('suspension')">Upgrade ($50)</button></div>
+            <div>Fuel Tank Level: <span id="lvl-fuel">1</span> <button class="btn" style="padding: 5px 10px; font-size: 14px; float: right;" onclick="upgrade('fuel')">Upgrade ($50)</button></div>
+        </div>
+        <button class="btn" onclick="closeGarage()">Back to Menu</button>
+    </div>
+
+    <!-- Rewards & Cashout Modal -->
+    <div id="rewards-modal" class="modal">
+        <span class="close-modal" onclick="closeRewardsModal()">&times;</span>
+        <h2>Rewards & Payouts</h2>
+        <p>Watch Ad to Earn Real Cash or Withdraw Balances!</p>
+        <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <p>Current Real Money Balance: <strong id="wallet-balance" style="color: #2ecc71; font-size: 24px;">$0.25</strong></p>
+        </div>
+        <button class="btn btn-ad" onclick="watchAdMobReward()">📺 Watch Ad & Earn $0.25</button>
+        <hr style="border: 0; border-top: 1px solid #444; margin: 15px 0;">
+        <input type="text" id="upi-input" placeholder="Enter UPI ID (e.g. user@okaxis) or PayPal Email">
+        <button class="btn btn-secondary" onclick="requestWithdrawal()">Withdraw Cash (Min $10)</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let gameState = "MENU"; // MENU, PLAYING, GAMEOVER
+    let score = 0;
+    let cashBalance = 0.25;
+    let fuel = 100;
+    
+    // Upgrades
+    let upgrades = { engine: 1, suspension: 1, fuel: 1 };
+
+    // Physics & Car State
+    let car = {
+        x: 100, y: 300, vx: 0, vy: 0, angle: 0, vAngle: 0,
+        width: 70, height: 30, wheelBase: 50
+    };
+
+    let cameraX = 0;
+    let terrainPoints = [];
+
+    // Initialize Terrain Generator
+    function generateTerrain() {
+        terrainPoints = [];
+        let height = 450;
+        let slope = 0;
+        for (let x = 0; x < 20000; x += 40) {
+            slope += (Math.random() - 0.5) * 0.4;
+            slope = Math.max(-0.6, Math.min(0.6, slope));
+            height += slope * 40;
+            height = Math.max(250, Math.min(600, height));
+            terrainPoints.push({ x: x, y: height });
+        }
+    }
+    generateTerrain();
+
+    function getTerrainHeight(x) {
+        let p1 = terrainPoints[0];
+        let p2 = terrainPoints[terrainPoints.length - 1];
+        for (let i = 0; i < terrainPoints.length - 1; i++) {
+            if (x >= terrainPoints[i].x && x <= terrainPoints[i+1].x) {
+                p1 = terrainPoints[i];
+                p2 = terrainPoints[i+1];
+                break;
+            }
+        }
+        let ratio = (x - p1.x) / (p2.x - p1.x);
+        return p1.y + ratio * (p2.y - p1.y);
+    }
+
+    // Input States
+    let keys = { gas: false, brake: false };
+
+    window.addEventListener("keydown", e => {
+        if (e.key === "ArrowRight" || e.key === "d") keys.gas = true;
+        if (e.key === "ArrowLeft" || e.key === "a") keys.brake = true;
+    });
+    window.addEventListener("keyup", e => {
+        if (e.key === "ArrowRight" || e.key === "d") keys.gas = false;
+        if (e.key === "ArrowLeft" || e.key === "a") keys.brake = false;
+    });
+
+    // Touch Button Bindings
+    const btnGas = document.getElementById("btn-gas");
+    const btnBrake = document.getElementById("btn-brake");
+
+    btnGas.addEventListener("touchstart", () => keys.gas = true);
+    btnGas.addEventListener("touchend", () => keys.gas = false);
+    btnGas.addEventListener("mousedown", () => keys.gas = true);
+    btnGas.addEventListener("mouseup", () => keys.gas = false);
+
+    btnBrake.addEventListener("touchstart", () => keys.brake = true);
+    btnBrake.addEventListener("touchend", () => keys.brake = false);
+    btnBrake.addEventListener("mousedown", () => keys.brake = true);
+    btnBrake.addEventListener("mouseup", () => keys.brake = false);
+
+    function startGame() {
+        document.getElementById("menu-screen").classList.add("hidden");
+        document.getElementById("gameover-screen").classList.add("hidden");
+        document.getElementById("hud").classList.remove("hidden");
+        document.getElementById("touch-controls").classList.remove("hidden");
+
+        car.x = 100;
+        car.y = 200;
+        car.vx = 0;
+        car.vy = 0;
+        car.angle = 0;
+        car.vAngle = 0;
+        score = 0;
+        fuel = 100 + (upgrades.fuel * 20);
+        gameState = "PLAYING";
+    }
+
+    function returnToMenu() {
+        document.getElementById("gameover-screen").classList.add("hidden");
+        document.getElementById("hud").classList.add("hidden");
+        document.getElementById("touch-controls").classList.add("hidden");
+        document.getElementById("menu-screen").classList.remove("hidden");
+        gameState = "MENU";
+    }
+
+    // Garage & UI Management
+    function openGarage() { document.getElementById("garage-modal").style.display = "block"; }
+    function closeGarage() { document.getElementById("garage-modal").style.display = "none"; }
+    function openRewardsModal() { document.getElementById("rewards-modal").style.display = "block"; }
+    function closeRewardsModal() { document.getElementById("rewards-modal").style.display = "none"; }
+
+    function upgrade(type) {
+        if (score >= 50) {
+            score -= 50;
+            upgrades[type]++;
+            document.getElementById(`lvl-${type}`).innerText = upgrades[type];
+            document.getElementById("score-val").innerText = score;
+            alert("Upgrade Successful!");
+        } else {
+            alert("Not enough coins! Need 50 coins.");
+        }
+    }
+
+    // AdMob Rewarded Ad Simulation
+    function watchAdMobReward() {
+        alert("Loading Google AdMob Rewarded Video Ad...");
+        setTimeout(() => {
+            alert("Ad completed! $0.25 added to your real money balance.");
+            cashBalance += 0.25;
+            document.getElementById("wallet-balance").innerText = `$${cashBalance.toFixed(2)}`;
+            document.getElementById("cash-val").innerText = `$${cashBalance.toFixed(2)}`;
+        }, 2000);
+    }
+
+    // UPI Withdrawal Request
+    function requestWithdrawal() {
+        const upiId = document.getElementById("upi-input").value;
+        if (!upiId) {
+            alert("Please enter a valid UPI ID or PayPal Email!");
+            return;
+        }
+        if (cashBalance < 10.0) {
+            alert("Minimum withdrawal amount is $10.00. Keep playing and watching ads to earn more!");
+            return;
+        }
+        alert(`Payout request of $${cashBalance.toFixed(2)} successfully submitted to ${upiId}! Processed within 24 hours.`);
+        cashBalance = 0;
+        document.getElementById("wallet-balance").innerText = "$0.00";
+        document.getElementById("cash-val").innerText = "$0.00";
+    }
+
+    // Main Game Loop
+    function update() {
+        if (gameState !== "PLAYING") return;
+
+        // Physics calculations
+        let groundY = getTerrainHeight(car.x);
+        let slopeAngle = Math.atan2(getTerrainHeight(car.x + 10) - getTerrainHeight(car.x - 10), 20);
+
+        // Acceleration & Braking
+        let power = 0.15 + (upgrades.engine * 0.03);
+        if (keys.gas) {
+            car.vx += Math.cos(car.angle) * power;
+            car.vy += Math.sin(car.angle) * power;
+            fuel -= 0.05;
+        }
+        if (keys.brake) {
+            car.vx -= Math.cos(car.angle) * 0.1;
+        }
+
+        // Gravity & Friction
+        car.vy += 0.35; // Gravity
+        car.vx *= 0.98; // Drag
+
+        car.x += car.vx;
+        car.y += car.vy;
+
+        // Terrain Collision
+        if (car.y >= groundY - car.height / 2) {
+            car.y = groundY - car.height / 2;
+            car.vy = 0;
+            car.angle = slopeAngle; // Align with ground slope
+            
+            // Score based on distance
+            score = Math.floor(car.x / 10);
+            document.getElementById("score-val").innerText = score;
+        } else {
+            // Mid-air rotation controls
+            if (keys.gas) car.vAngle += 0.005;
+            if (keys.brake) car.vAngle -= 0.005;
+            car.angle += car.vAngle;
+            car.vAngle *= 0.95;
+        }
+
+        // Fuel check
+        document.getElementById("fuel-bar").style.width = Math.max(0, fuel) + "%";
+        if (fuel <= 0 || car.y > 700) {
+            gameOver();
+        }
+
+        // Camera follow
+        cameraX = car.x - 300;
+    }
+
+    function gameOver() {
+        gameState = "GAMEOVER";
+        document.getElementById("hud").classList.add("hidden");
+        document.getElementById("touch-controls").classList.add("hidden");
+        document.getElementById("final-score").innerText = score;
+        document.getElementById("gameover-screen").classList.remove("hidden");
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.save();
+        ctx.translate(-cameraX, 0);
+
+        // Draw Sky/Background elements
+        ctx.fillStyle = "#f5a623";
+        ctx.fillRect(cameraX, 0, canvas.width, canvas.height);
+
+        // Draw Terrain Hills
+        ctx.beginPath();
+        ctx.moveTo(terrainPoints[0].x, terrainPoints[0].y);
+        for (let i = 1; i < terrainPoints.length; i++) {
+            ctx.lineTo(terrainPoints[i].x, terrainPoints[i].y);
+        }
+        ctx.lineTo(terrainPoints[terrainPoints.length-1].x, 800);
+        ctx.lineTo(terrainPoints[0].x, 800);
+        ctx.fillStyle = "#8e44ad";
+        ctx.fill();
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "#d35400";
+        ctx.stroke();
+
+        // Draw Car
+        ctx.save();
+        ctx.translate(car.x, car.y);
+        ctx.rotate(car.angle);
+
+        // Car Body
+        ctx.fillStyle = "#e74c3c";
+        ctx.fillRect(-car.width/2, -car.height, car.width, car.height);
+
+        // Wheels
+        ctx.fillStyle = "#222";
+        ctx.beginPath();
+        ctx.arc(-20, 0, 12, 0, Math.PI * 2);
+        ctx.arc(20, 0, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+        ctx.restore();
+    }
+
+    function loop() {
+        update();
+        draw();
+        requestAnimationFrame(loop);
+    }
+
+    loop();
+</script>
+
+</body>
+</html>
