@@ -25,7 +25,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -46,6 +45,22 @@ jobs:
 
       - name: Add Android platform
         run: npx cap add android
+
+      - name: Set landscape game orientation
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          manifest = Path("android/app/src/main/AndroidManifest.xml")
+          tree = ET.parse(manifest)
+          root = tree.getroot()
+          ns = "{http://schemas.android.com/apk/res/android}"
+          activity = root.find("application/activity")
+          if activity is None:
+              raise SystemExit("Main Android activity not found")
+          activity.set(ns + "screenOrientation", "landscape")
+          tree.write(manifest, encoding="utf-8", xml_declaration=True)
+          PY
 
       - name: Sync Capacitor
         run: npx cap sync android
