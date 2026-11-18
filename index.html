@@ -26,262 +26,320 @@
             max-width: 177.78vh;
             background: #111;
             box-shadow: 0 0 50px rgba(0,0,0,0.95);
-            border: 3px solid #1e293b;
+            border: 3px solid #000;
             overflow: hidden;
         }
         canvas { display: block; width: 100%; height: 100%; }
 
-        /* Classic Hill Climb Top-Left HUD */
-        .hcr-top-left {
+        /* ================= MAIN MENU (HILL CLIMB RACING STYLE) ================= */
+        #menu-screen {
             position: absolute;
-            top: 14px; left: 16px;
+            inset: 0;
+            background: linear-gradient(180deg, #0284c7 0%, #38bdf8 55%, #65a30d 55%, #78350f 100%);
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            pointer-events: none;
-            z-index: 6;
+            justify-content: space-between;
+            z-index: 15;
+            padding: 10px 16px;
         }
-        .fuel-row { display: flex; align-items: center; gap: 8px; }
-        .fuel-icon {
-            width: 28px; height: 32px; background: #ef4444;
-            border: 2px solid #000; border-radius: 4px;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 14px; font-weight: bold; color: #fff;
-            box-shadow: 2px 2px 0 #000;
-        }
-        .fuel-bar-outer {
-            width: 150px; height: 22px;
-            background: rgba(0,0,0,0.65);
+        /* Top Bar */
+        .menu-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.85);
             border: 3px solid #000;
-            border-radius: 4px;
-            padding: 2px;
+            border-radius: 12px;
+            padding: 6px 14px;
+            box-shadow: 0 4px 0 #000;
         }
-        #fuel-fill {
-            width: 100%; height: 100%;
-            background: linear-gradient(180deg, #4ade80, #16a34a);
-            transition: width 0.1s linear;
-        }
-        .stat-row {
-            display: flex; align-items: center; gap: 8px;
-            font-size: 24px; letter-spacing: 1px;
-            color: #fff;
-            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 4px 0 #000;
-        }
-        .coin-icon {
-            width: 26px; height: 26px; border-radius: 50%;
+        .currency-group { display: flex; align-items: center; gap: 14px; font-size: 18px; }
+        .curr-item { display: flex; align-items: center; gap: 6px; text-shadow: 1px 2px 0 #000; }
+        .coin-dot {
+            width: 22px; height: 22px; border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #fef08a, #eab308);
             border: 2px solid #000; display: inline-flex; justify-content: center; align-items: center;
-            color: #78350f; font-size: 14px; box-shadow: 2px 2px 0 #000;
+            color: #78350f; font-size: 12px;
         }
-        .diamond-icon {
-            width: 24px; height: 24px;
-            background: linear-gradient(135deg, #7dd3fc, #0284c7);
-            border: 2px solid #000; transform: rotate(45deg) scale(0.75);
-            display: inline-block; margin-left: 2px; box-shadow: 2px 2px 0 #000;
+        .diamond-dot {
+            width: 16px; height: 16px; background: #38bdf8;
+            border: 2px solid #000; transform: rotate(45deg); display: inline-block;
+        }
+        .logo-text {
+            font-size: 24px; color: #facc15; letter-spacing: 1px;
+            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
         }
 
-        /* Top-Center Milestone Progress Bar */
-        .hcr-top-center {
-            position: absolute;
-            top: 16px; left: 50%; transform: translateX(-50%);
-            display: flex; flex-direction: column; align-items: center;
+        /* Center Horizontal Carousel (Vehicles / Maps / Upgrades) */
+        .menu-center-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            margin: 6px 0;
+        }
+        .carousel-header {
+            background: rgba(0, 0, 0, 0.75);
+            padding: 4px 16px;
+            border-radius: 20px;
+            border: 2px solid #facc15;
+            font-size: 14px;
+            color: #facc15;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        .horizontal-scroll {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            overflow-x: auto;
+            padding: 8px 12px;
+            scroll-behavior: smooth;
+        }
+        .horizontal-scroll::-webkit-scrollbar { height: 6px; }
+        .horizontal-scroll::-webkit-scrollbar-thumb { background: #facc15; border-radius: 4px; }
+
+        .item-card {
+            flex: 0 0 175px;
+            background: rgba(15, 23, 42, 0.92);
+            border: 3px solid #000;
+            border-radius: 14px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 5px 0 #000;
+            cursor: pointer;
+            transition: transform 0.12s;
+            position: relative;
+        }
+        .item-card.selected {
+            background: #0369a1;
+            border-color: #facc15;
+            transform: scale(1.04);
+        }
+        .item-card.locked {
+            opacity: 0.92;
+            background: #1e293b;
+        }
+        .card-icon {
+            font-size: 32px;
+            margin: 4px 0;
+            filter: drop-shadow(0 3px 0 #000);
+        }
+        .card-title {
+            font-size: 15px;
+            color: #fff;
+            text-shadow: 1px 1px 0 #000;
+        }
+        .card-sub {
+            font-family: sans-serif;
+            font-size: 11px;
+            color: #cbd5e1;
+            margin-bottom: 6px;
+        }
+        .card-action-btn {
+            width: 100%;
+            padding: 6px 8px;
+            font-family: inherit;
+            font-size: 13px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #000;
+            color: #fff;
+            text-shadow: 1px 1px 0 #000;
+        }
+        .btn-buy { background: #eab308; color: #000; text-shadow: none; }
+        .btn-equipped { background: #22c55e; }
+        .btn-select { background: #3b82f6; }
+
+        /* Tune / Upgrade Grid inside Menu */
+        .tune-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            width: 100%;
+            padding: 0 10px;
+        }
+        .tune-box {
+            background: rgba(15, 23, 42, 0.92);
+            border: 3px solid #000;
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 4px 0 #000;
+        }
+        .tune-box h4 { font-size: 14px; color: #38bdf8; margin-bottom: 4px; }
+        .tune-lvl { font-family: sans-serif; font-size: 12px; color: #facc15; font-weight: bold; margin-bottom: 8px; }
+
+        /* Bottom Navigation Bar (Always Visible!) */
+        .menu-bottom-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 3px solid #000;
+            border-radius: 14px;
+            padding: 6px 10px;
+            box-shadow: 0 4px 0 #000;
+        }
+        .nav-tabs { display: flex; gap: 6px; flex: 1; }
+        .tab-btn {
+            flex: 1;
+            padding: 10px 6px;
+            font-family: inherit;
+            font-size: 14px;
+            color: #fff;
+            background: #334155;
+            border: 2px solid #000;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #000;
+            text-shadow: 1px 1px 0 #000;
+        }
+        .tab-btn.active { background: #0284c7; border-color: #facc15; color: #facc15; }
+        .start-race-btn {
+            padding: 10px 26px;
+            font-family: inherit;
+            font-size: 22px;
+            background: linear-gradient(180deg, #4ade80, #16a34a);
+            color: #fff;
+            border: 3px solid #000;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #000;
+            text-shadow: -1px -1px 0 #000, 1px 2px 0 #000;
+            letter-spacing: 1px;
+        }
+        .start-race-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #000; }
+
+        /* ================= IN-GAME HUD (EXACT HILL CLIMB STYLE) ================= */
+        .hcr-top-left {
+            position: absolute; top: 12px; left: 14px;
+            display: flex; flex-direction: column; gap: 5px;
             pointer-events: none; z-index: 6;
         }
-        .progress-track {
-            width: 260px; height: 8px;
-            background: rgba(0,0,0,0.6);
+        .fuel-row { display: flex; align-items: center; gap: 6px; }
+        .fuel-icon {
+            width: 26px; height: 30px; background: #ef4444;
             border: 2px solid #000; border-radius: 4px;
-            position: relative; margin-bottom: 6px;
-        }
-        #progress-fill {
-            height: 100%; width: 0%;
-            background: #38bdf8;
-        }
-        .star-badge {
-            position: absolute; left: -12px; top: -10px;
-            width: 26px; height: 26px; background: #facc15;
-            border: 2px solid #000; border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
-            font-size: 14px; color: #000;
+            font-size: 13px; box-shadow: 2px 2px 0 #000;
         }
-        .distance-text {
+        .fuel-bar-outer {
+            width: 140px; height: 20px; background: rgba(0,0,0,0.7);
+            border: 3px solid #000; border-radius: 4px; padding: 2px;
+        }
+        #fuel-fill { width: 100%; height: 100%; background: linear-gradient(180deg, #4ade80, #16a34a); }
+        .stat-row {
+            display: flex; align-items: center; gap: 6px;
             font-size: 22px; color: #fff;
             text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
         }
 
-        /* Top-Right Pause & Cashout */
-        .hcr-top-right {
-            position: absolute; top: 14px; right: 16px;
-            display: flex; gap: 10px; z-index: 6;
+        .hcr-top-center {
+            position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+            display: flex; flex-direction: column; align-items: center;
+            pointer-events: none; z-index: 6;
         }
-        .pause-btn {
-            width: 44px; height: 44px;
-            background: #f8fafc; border: 3px solid #000; border-radius: 8px;
-            font-size: 18px; font-weight: 900; color: #000;
-            cursor: pointer; box-shadow: 0 4px 0 #000;
+        .progress-track {
+            width: 240px; height: 8px; background: rgba(0,0,0,0.65);
+            border: 2px solid #000; border-radius: 4px; position: relative; margin-bottom: 4px;
+        }
+        #progress-fill { height: 100%; width: 0%; background: #38bdf8; }
+        .star-badge {
+            position: absolute; left: -12px; top: -10px;
+            width: 24px; height: 24px; background: #facc15;
+            border: 2px solid #000; border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
+            font-size: 13px; color: #000;
         }
-        .pause-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #000; }
+        .distance-text {
+            font-size: 20px; color: #fff;
+            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+        }
 
-        /* Classic Metallic Brake & Gas Pedals */
+        .pause-btn {
+            position: absolute; top: 12px; right: 14px;
+            width: 42px; height: 42px; background: #f8fafc;
+            border: 3px solid #000; border-radius: 8px;
+            font-size: 18px; font-weight: 900; color: #000;
+            cursor: pointer; box-shadow: 0 4px 0 #000; z-index: 6;
+        }
+
+        /* Metallic Pedals */
         .hcr-pedal {
-            position: absolute; bottom: 18px;
-            width: 115px; height: 135px;
+            position: absolute; bottom: 14px;
+            width: 105px; height: 125px;
             background: linear-gradient(180deg, #e2e8f0 0%, #94a3b8 100%);
-            border: 4px solid #0f172a;
-            border-radius: 14px;
-            box-shadow: inset 0 4px 0 #fff, 0 8px 0 #000;
+            border: 4px solid #000; border-radius: 14px;
+            box-shadow: inset 0 4px 0 #fff, 0 7px 0 #000;
             display: flex; flex-direction: column; justify-content: space-between; align-items: center;
-            padding: 12px 10px;
-            cursor: pointer; z-index: 6;
-            transition: transform 0.05s;
+            padding: 10px 8px; cursor: pointer; z-index: 6;
         }
-        .hcr-pedal.left { left: 22px; }
-        .hcr-pedal.right { right: 22px; }
-        .pedal-holes {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%;
-        }
-        .hole {
-            width: 18px; height: 18px; border-radius: 50%;
-            background: #334155; border: 2px solid #0f172a; margin: auto;
-            box-shadow: inset 0 2px 3px #000;
-        }
-        .pedal-label {
-            font-size: 18px; color: #0f172a; font-weight: 900; letter-spacing: 1px;
-        }
-        .hcr-pedal:active, .hcr-pedal.pressed {
-            transform: translateY(6px) scale(0.96);
-            box-shadow: inset 0 2px 0 #fff, 0 2px 0 #000;
-            background: linear-gradient(180deg, #cbd5e1 0%, #64748b 100%);
-        }
+        .hcr-pedal.left { left: 18px; }
+        .hcr-pedal.right { right: 18px; }
+        .pedal-holes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; }
+        .hole { width: 16px; height: 16px; border-radius: 50%; background: #334155; border: 2px solid #000; margin: auto; }
+        .pedal-label { font-size: 17px; color: #0f172a; font-weight: 900; }
+        .hcr-pedal:active, .hcr-pedal.pressed { transform: translateY(5px) scale(0.96); box-shadow: 0 2px 0 #000; }
 
-        /* Bottom-Center Analog Gauges (RPM, BOOST & Nitro) */
+        /* Analog Gauges & Nitro */
         .hcr-gauges {
-            position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
-            display: flex; align-items: flex-end; gap: 18px;
-            z-index: 6; pointer-events: none;
+            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: flex-end; gap: 14px; z-index: 6; pointer-events: none;
         }
         .nitro-btn {
-            pointer-events: auto;
-            width: 58px; height: 58px; border-radius: 50%;
+            pointer-events: auto; width: 52px; height: 52px; border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #e0f2fe, #38bdf8);
-            border: 4px solid #000; box-shadow: 0 4px 0 #000;
+            border: 3px solid #000; box-shadow: 0 4px 0 #000;
             display: flex; justify-content: center; align-items: center;
-            cursor: pointer; margin-bottom: 12px; position: relative;
+            cursor: pointer; margin-bottom: 10px; position: relative;
         }
-        .nitro-btn:active { transform: scale(0.9); }
-        .nitro-bottle {
-            width: 16px; height: 30px; background: #0284c7;
-            border: 2px solid #000; border-radius: 4px; transform: rotate(25deg);
-        }
+        .nitro-bottle { width: 14px; height: 26px; background: #0284c7; border: 2px solid #000; border-radius: 4px; transform: rotate(25deg); }
         .nitro-count {
             position: absolute; top: -6px; right: -6px;
-            background: #facc15; color: #000; border: 2px solid #000;
-            border-radius: 50%; width: 22px; height: 22px;
-            font-size: 13px; display: flex; justify-content: center; align-items: center;
+            background: #facc15; color: #000; border: 2px solid #000; border-radius: 50%;
+            width: 20px; height: 20px; font-size: 12px; display: flex; justify-content: center; align-items: center;
         }
         .gauge {
-            width: 105px; height: 105px; border-radius: 50%;
+            width: 92px; height: 92px; border-radius: 50%;
             background: radial-gradient(circle, #fef3c7 55%, #d97706 100%);
-            border: 4px solid #000;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.6), 0 4px 0 #000;
-            position: relative; display: flex; justify-content: center; align-items: flex-end;
-            padding-bottom: 14px;
+            border: 4px solid #000; box-shadow: inset 0 0 8px rgba(0,0,0,0.6), 0 4px 0 #000;
+            position: relative; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 12px;
         }
-        .gauge::after {
-            content: ''; position: absolute; right: 12px; top: 28px;
-            width: 14px; height: 36px; background: #ef4444;
-            border-radius: 4px; transform: rotate(25deg); opacity: 0.85;
-        }
-        .gauge-label {
-            font-size: 13px; color: #000; font-weight: 900; z-index: 2;
-        }
+        .gauge-label { font-size: 12px; color: #000; font-weight: 900; z-index: 2; }
         .needle {
             position: absolute; bottom: 50%; left: 50%;
-            width: 4px; height: 38px; background: #ef4444;
-            border: 1px solid #000; transform-origin: bottom center;
-            transform: translateX(-50%) rotate(-110deg);
+            width: 4px; height: 34px; background: #ef4444; border: 1px solid #000;
+            transform-origin: bottom center; transform: translateX(-50%) rotate(-110deg);
             transition: transform 0.08s ease-out; z-index: 3;
         }
         .needle-cap {
             position: absolute; top: 50%; left: 50%;
-            width: 14px; height: 14px; background: #1e293b;
-            border: 2px solid #000; border-radius: 50%;
+            width: 12px; height: 12px; background: #1e293b; border: 2px solid #000; border-radius: 50%;
             transform: translate(-50%, -50%); z-index: 4;
         }
 
-        /* Air Time Floating Text */
         #airtime-banner {
-            position: absolute; top: 28%; left: 55%;
-            font-size: 28px; color: #fff; text-align: center;
-            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 4px 0 #000;
+            position: absolute; top: 26%; left: 54%;
+            font-size: 26px; color: #fff; text-align: center;
+            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
             pointer-events: none; z-index: 7;
-            transition: opacity 0.2s;
         }
 
-        /* Main Menu & Overlays */
-        .overlay-screen {
+        /* Game Over Overlay */
+        #gameover-screen {
             position: absolute; inset: 0;
-            background: linear-gradient(180deg, rgba(14, 116, 144, 0.92), rgba(15, 23, 42, 0.98));
-            display: flex; flex-direction: column; justify-content: space-between; align-items: center;
-            z-index: 15; padding: 18px 24px;
-        }
-        .menu-header {
-            width: 100%; display: flex; justify-content: space-between; align-items: center;
-        }
-        .game-logo {
-            font-size: clamp(26px, 3.8vw, 42px); color: #facc15;
-            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 5px 0 #b45309;
-            letter-spacing: 1px;
-        }
-        .section-title {
-            font-size: 15px; color: #bae6fd; text-shadow: 1px 1px 0 #000;
-            margin-bottom: 6px; text-transform: uppercase;
-        }
-        .cards-row {
-            display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
-        }
-        .select-card {
-            background: #1e293b; border: 3px solid #000; border-radius: 12px;
-            padding: 8px 12px; width: 155px; cursor: pointer;
-            box-shadow: 0 4px 0 #000; text-align: center; transition: 0.15s;
-        }
-        .select-card.active {
-            background: #0284c7; border-color: #facc15; transform: translateY(-3px);
-        }
-        .select-card h4 { font-size: 14px; color: #fff; text-shadow: 1px 1px 0 #000; }
-        .select-card span { font-size: 11px; color: #fde047; font-family: sans-serif; font-weight: bold; }
-
-        .menu-footer {
-            display: flex; gap: 14px; align-items: center;
-        }
-        .hcr-btn {
-            padding: 12px 28px; font-size: 20px; font-family: inherit;
-            color: #fff; border: 3px solid #000; border-radius: 12px;
-            cursor: pointer; box-shadow: 0 5px 0 #000;
-            text-shadow: 1px 2px 0 #000; letter-spacing: 1px;
-        }
-        .hcr-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #000; }
-        .btn-green { background: linear-gradient(180deg, #4ade80, #16a34a); }
-        .btn-blue { background: linear-gradient(180deg, #38bdf8, #0284c7); }
-        .btn-purple { background: linear-gradient(180deg, #c084fc, #7e22ce); }
-
-        /* Modals */
-        .modal {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #1e293b; border: 4px solid #000; border-radius: 16px;
-            padding: 20px; width: 90%; max-width: 480px; z-index: 25;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.95); text-align: center;
-        }
-        .upgrade-row {
-            background: #0f172a; border: 2px solid #000; border-radius: 10px;
-            padding: 10px 14px; margin: 8px 0;
-            display: flex; justify-content: space-between; align-items: center;
-            font-family: sans-serif;
-        }
-        .modal input {
-            width: 100%; padding: 10px; margin: 10px 0;
-            border: 2px solid #000; border-radius: 8px; font-size: 15px;
+            background: rgba(11, 15, 25, 0.92);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            gap: 16px; z-index: 20;
         }
         .hidden { display: none !important; }
     </style>
@@ -291,25 +349,64 @@
 <div id="game-wrapper">
     <canvas id="gameCanvas" width="1280" height="720"></canvas>
 
-    <!-- Hill Climb HUD -->
+    <!-- ================= MAIN MENU SCREEN ================= -->
+    <div id="menu-screen">
+        <!-- Top Currency & Selected Info -->
+        <div class="menu-top-bar">
+            <div class="currency-group">
+                <div class="curr-item"><span class="coin-dot">C</span> <span id="menu-coins">2,500</span></div>
+                <div class="curr-item"><span class="diamond-dot"></span> <span id="menu-diamonds">25</span></div>
+                <div class="curr-item" style="color:#4ade80;">💵 $<span id="menu-cash">0.25</span></div>
+            </div>
+            <div class="logo-text">TURBO RIDGE</div>
+            <div style="font-family:sans-serif; font-size:12px; color:#bae6fd; text-align:right;">
+                Ride: <strong id="lbl-selected-veh" style="color:#facc15;">Hero Honda Splendor</strong><br>
+                Stage: <strong id="lbl-selected-map" style="color:#4ade80;">Countryside</strong>
+            </div>
+        </div>
+
+        <!-- Center Dynamic Tab Content -->
+        <div class="menu-center-area">
+            <div class="carousel-header" id="tab-heading">🏍️ SELECT OR BUY VEHICLES (16 INDIAN BIKES & CARS)</div>
+            <div class="horizontal-scroll" id="carousel-container"></div>
+            <div class="tune-grid hidden" id="tune-container"></div>
+            <div class="hidden" id="earn-container" style="background:rgba(15,23,42,0.95); border:3px solid #000; border-radius:14px; padding:16px; width:90%; max-width:520px; text-align:center;">
+                <h3 style="color:#facc15; margin-bottom:6px;">🎁 REWARDS & UPI CASHOUT</h3>
+                <p style="font-family:sans-serif; font-size:13px; color:#cbd5e1; margin-bottom:10px;">Watch AdMob Rewarded Ads (+$0.25) or withdraw earnings to your UPI ID</p>
+                <div style="display:flex; gap:10px; justify-content:center; margin-bottom:10px;">
+                    <button class="card-action-btn btn-buy" style="width:auto; padding:8px 16px;" onclick="watchAd()">📺 WATCH AD (+$0.25)</button>
+                    <button class="card-action-btn btn-select" style="width:auto; padding:8px 16px;" onclick="claimFreeCoins()">🪙 FREE +1000 COINS</button>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <input type="text" id="upi-input" placeholder="Enter UPI ID (e.g. niranjan@okicici)" style="flex:1; padding:8px; border-radius:8px; border:2px solid #000;">
+                    <button class="card-action-btn btn-equipped" style="width:auto; padding:8px 16px;" onclick="withdraw()">💸 WITHDRAW ($10 Min)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Tab Bar + BIG VISIBLE START BUTTON -->
+        <div class="menu-bottom-bar">
+            <div class="nav-tabs">
+                <button class="tab-btn active" id="tab-vehicles" onclick="switchTab('vehicles')">🏍️ VEHICLE</button>
+                <button class="tab-btn" id="tab-maps" onclick="switchTab('maps')">🗺️ STAGE (24)</button>
+                <button class="tab-btn" id="tab-tune" onclick="switchTab('tune')">🔧 TUNE</button>
+                <button class="tab-btn" id="tab-earn" onclick="switchTab('earn')">🎁 EARN</button>
+            </div>
+            <button class="start-race-btn" onclick="startGame()">▶ START</button>
+        </div>
+    </div>
+
+    <!-- ================= IN-GAME HUD ================= -->
     <div id="hud-layer" class="hidden">
-        <!-- Top Left -->
         <div class="hcr-top-left">
             <div class="fuel-row">
                 <div class="fuel-icon">⛽</div>
                 <div class="fuel-bar-outer"><div id="fuel-fill"></div></div>
             </div>
-            <div class="stat-row">
-                <span class="coin-icon">C</span>
-                <span id="hud-coins">500</span>
-            </div>
-            <div class="stat-row">
-                <span class="diamond-icon"></span>
-                <span id="hud-diamonds">25</span>
-            </div>
+            <div class="stat-row"><span class="coin-dot">C</span> <span id="hud-coins">0</span></div>
+            <div class="stat-row"><span class="diamond-dot"></span> <span id="hud-diamonds">25</span></div>
         </div>
 
-        <!-- Top Center -->
         <div class="hcr-top-center">
             <div class="progress-track">
                 <div class="star-badge">★</div>
@@ -318,15 +415,10 @@
             <div class="distance-text"><span id="hud-dist">0</span>m</div>
         </div>
 
-        <!-- Top Right -->
-        <div class="hcr-top-right">
-            <button class="pause-btn" onclick="togglePause()">II</button>
-        </div>
+        <button class="pause-btn" onclick="returnMenu()">🏠</button>
 
-        <!-- Floating Air Time Text -->
-        <div id="airtime-banner" class="hidden">AIR TIME<br><span id="airtime-pts" style="color:#facc15;">+50</span></div>
+        <div id="airtime-banner" class="hidden">AIR TIME<br><span style="color:#facc15;">+50</span></div>
 
-        <!-- Bottom Center Gauges -->
         <div class="hcr-gauges">
             <div class="nitro-btn" onclick="activateNitro()">
                 <div class="nitro-bottle"></div>
@@ -344,7 +436,6 @@
             </div>
         </div>
 
-        <!-- Bottom Left & Right Metal Pedals -->
         <div id="btn-brake" class="hcr-pedal left">
             <div class="pedal-holes">
                 <div class="hole"></div><div class="hole"></div><div class="hole"></div>
@@ -362,87 +453,17 @@
         </div>
     </div>
 
-    <!-- Main Menu Screen -->
-    <div id="menu-screen" class="overlay-screen">
-        <div class="menu-header">
-            <div class="stat-row" style="font-size:20px;">
-                <span class="coin-icon">C</span> <span id="menu-coins">500</span>
-                &nbsp;&nbsp;
-                <span class="diamond-icon"></span> <span id="menu-diamonds">25</span>
-            </div>
-            <div class="game-logo">TURBO RIDGE</div>
-            <div class="stat-row" style="font-size:20px; color:#4ade80;">
-                💵 $<span id="menu-cash">0.25</span>
-            </div>
-        </div>
-
-        <div>
-            <div class="section-title">🏍️ Select Vehicle (Indian Bikes & Offroad)</div>
-            <div class="cards-row" id="vehicle-cards"></div>
-        </div>
-
-        <div>
-            <div class="section-title">🗺️ Select Stage / Map</div>
-            <div class="cards-row" id="map-cards"></div>
-        </div>
-
-        <div class="menu-footer">
-            <button class="hcr-btn btn-blue" onclick="openModal('garage-modal')">🔧 TUNE / UPGRADE</button>
-            <button class="hcr-btn btn-green" onclick="startGame()">▶ START RACE</button>
-            <button class="hcr-btn btn-purple" onclick="openModal('earn-modal')">🎁 EARN & UPI</button>
-        </div>
-    </div>
-
-    <!-- Game Over Screen -->
-    <div id="gameover-screen" class="overlay-screen hidden" style="justify-content:center; gap:20px;">
-        <div class="game-logo" style="color:#ef4444; font-size:48px;" id="go-title">OUT OF FUEL!</div>
+    <!-- ================= GAME OVER SCREEN ================= -->
+    <div id="gameover-screen" class="hidden">
+        <div class="logo-text" style="color:#ef4444; font-size:44px;" id="go-title">OUT OF FUEL!</div>
         <div class="stat-row">
             📏 Distance: <span id="go-dist" style="color:#38bdf8;">0</span>m &nbsp;|&nbsp;
-            <span class="coin-icon">C</span> <span id="go-coins">0</span>
+            <span class="coin-dot">C</span> <span id="go-coins">0</span>
         </div>
-        <div class="menu-footer">
-            <button class="hcr-btn btn-blue" onclick="returnMenu()">🏠 GARAGE MENU</button>
-            <button class="hcr-btn btn-green" onclick="startGame()">🔄 RACE AGAIN</button>
+        <div style="display:flex; gap:14px;">
+            <button class="tab-btn" style="padding:12px 24px; font-size:18px;" onclick="returnMenu()">🏠 MENU / SHOP</button>
+            <button class="start-race-btn" onclick="startGame()">🔄 RACE AGAIN</button>
         </div>
-    </div>
-
-    <!-- Upgrade Modal (500, 1000, 1500, 2000 Progression) -->
-    <div id="garage-modal" class="modal hidden">
-        <h2 style="color:#facc15; margin-bottom:6px;">🔧 VEHICLE UPGRADES</h2>
-        <p style="font-family:sans-serif; font-size:14px; color:#cbd5e1; margin-bottom:12px;">
-            Available Coins: <strong style="color:#facc15;" id="modal-coins">500</strong>
-        </p>
-        <div class="upgrade-row">
-            <div style="text-align:left;"><strong>Engine Power</strong><br><small style="color:#94a3b8;">Level <span id="lvl-engine">1</span></small></div>
-            <button class="hcr-btn btn-green" style="padding:6px 14px; font-size:15px;" id="btn-upg-engine" onclick="buyUpgrade('engine')">🪙 500</button>
-        </div>
-        <div class="upgrade-row">
-            <div style="text-align:left;"><strong>Suspension & Balance</strong><br><small style="color:#94a3b8;">Level <span id="lvl-susp">1</span></small></div>
-            <button class="hcr-btn btn-green" style="padding:6px 14px; font-size:15px;" id="btn-upg-susp" onclick="buyUpgrade('susp')">🪙 1000</button>
-        </div>
-        <div class="upgrade-row">
-            <div style="text-align:left;"><strong>Tyres & Hill Grip</strong><br><small style="color:#94a3b8;">Level <span id="lvl-grip">1</span></small></div>
-            <button class="hcr-btn btn-green" style="padding:6px 14px; font-size:15px;" id="btn-upg-grip" onclick="buyUpgrade('grip')">🪙 1500</button>
-        </div>
-        <div class="upgrade-row">
-            <div style="text-align:left;"><strong>Fuel Tank Size</strong><br><small style="color:#94a3b8;">Level <span id="lvl-fuel">1</span></small></div>
-            <button class="hcr-btn btn-green" style="padding:6px 14px; font-size:15px;" id="btn-upg-fuel" onclick="buyUpgrade('fuel')">🪙 2000</button>
-        </div>
-        <button class="hcr-btn btn-blue" style="margin-top:14px; padding:8px 24px; font-size:16px;" onclick="closeModals()">DONE</button>
-    </div>
-
-    <!-- Earn & UPI Modal -->
-    <div id="earn-modal" class="modal hidden">
-        <h2 style="color:#facc15; margin-bottom:6px;">🎁 REWARDS & UPI CASHOUT</h2>
-        <p style="font-family:sans-serif; font-size:13px; color:#cbd5e1;">Watch AdMob Rewarded Ads or withdraw via UPI</p>
-        <div style="background:#0f172a; padding:12px; border-radius:10px; margin:12px 0; border:2px solid #000;">
-            <div style="font-family:sans-serif; font-size:12px; color:#94a3b8;">Wallet Balance</div>
-            <div style="font-size:30px; color:#4ade80;">$<span id="modal-cash">0.25</span></div>
-        </div>
-        <button class="hcr-btn btn-purple" style="width:100%; font-size:16px; padding:10px;" onclick="watchAd()">📺 WATCH AD (+$0.25)</button>
-        <input type="text" id="upi-input" placeholder="Enter UPI ID (e.g. niranjan@okicici)">
-        <button class="hcr-btn btn-green" style="width:100%; font-size:16px; padding:10px;" onclick="withdraw()">💸 WITHDRAW (MIN $10)</button>
-        <button class="hcr-btn btn-blue" style="margin-top:12px; padding:6px 20px; font-size:14px;" onclick="closeModals()">CLOSE</button>
     </div>
 </div>
 
@@ -451,57 +472,254 @@
     const ctx = canvas.getContext('2d');
 
     let state = 'MENU';
-    let coins = 500;
+    let activeTab = 'vehicles';
+    let coins = 2500; // Starting coins so player can test buying bikes/maps immediately
     let diamonds = 25;
     let cash = 0.25;
     let fuel = 100, maxFuel = 100;
     let distance = 0;
-    let nitros = 3, nitroTimer = 0;
-    let airFrames = 0;
+    let nitros = 3, nitroTimer = 0, airFrames = 0;
 
-    // Progressive Upgrade Levels & Base Costs (500, 1000, 1500, 2000)
+    // Progressive Upgrade Levels & Costs (500 -> 1000 -> 1500 -> 2000...)
     const upgrades = { engine: 1, susp: 1, grip: 1, fuel: 1 };
     const baseCosts = { engine: 500, susp: 1000, grip: 1500, fuel: 2000 };
 
-    // Indian Bikes & Offroad Vehicles
+    // 16 Indian Bikes & Offroad Vehicles (Buyable with Coins)
     const vehicles = [
-        { id: 'splendor', name: 'Hero Honda', tag: '2-Wheeler Classic', type: 'bike', color: '#dc2626', power: 1.0, wheelR: 15 },
-        { id: 'bullet', name: 'Royal Bullet 350', tag: 'Heavy Cruiser', type: 'bike', color: '#111827', power: 1.25, wheelR: 16 },
-        { id: 'superbike', name: 'Monster Sports', tag: 'High Speed Bike', type: 'bike', color: '#16a34a', power: 1.5, wheelR: 15 },
-        { id: 'buggy', name: 'Offroad Buggy', tag: '4x4 Hill Climber', type: 'car', color: '#ef4444', power: 1.35, wheelR: 18 }
+        { id: 'splendor', name: 'Hero Honda Splendor', icon: '🏍️', type: 'bike', color: '#dc2626', power: 1.0, wheelR: 15, cost: 0, owned: true },
+        { id: 'bullet', name: 'Royal Bullet 350', icon: '🏍️', type: 'bike', color: '#111827', power: 1.25, wheelR: 16, cost: 500, owned: false },
+        { id: 'rx100', name: 'Yamaha RX100', icon: '🏍️', type: 'bike', color: '#1d4ed8', power: 1.3, wheelR: 15, cost: 1000, owned: false },
+        { id: 'pulsar', name: 'Bajaj Pulsar 220', icon: '🏍️', type: 'bike', color: '#0f172a', power: 1.35, wheelR: 15, cost: 1500, owned: false },
+        { id: 'apache', name: 'TVS Apache RTR', icon: '🏍️', type: 'bike', color: '#f8fafc', power: 1.4, wheelR: 15, cost: 2000, owned: false },
+        { id: 'duke', name: 'KTM Duke 390', icon: '🏍️', type: 'bike', color: '#ea580c', power: 1.5, wheelR: 16, cost: 2500, owned: false },
+        { id: 'buggy', name: 'Offroad Dune Buggy', icon: '🏎️', type: 'car', color: '#ef4444', power: 1.45, wheelR: 18, cost: 3000, owned: false },
+        { id: 'gypsy', name: 'Maruti Gypsy 4x4', icon: '🚙', type: 'car', color: '#16a34a', power: 1.5, wheelR: 18, cost: 3500, owned: false },
+        { id: 'thar', name: 'Mahindra Thar 4x4', icon: '🚙', type: 'car', color: '#111827', power: 1.6, wheelR: 19, cost: 4000, owned: false },
+        { id: 'bolero', name: 'Desi Bolero Camper', icon: '🛻', type: 'car', color: '#cbd5e1', power: 1.55, wheelR: 18, cost: 4500, owned: false },
+        { id: 'tractor', name: 'Swaraj 855 Tractor', icon: '🚜', type: 'car', color: '#2563eb', power: 1.65, wheelR: 22, cost: 5000, owned: false },
+        { id: 'superbike', name: 'Kawasaki Ninja H2', icon: '🏍️', type: 'bike', color: '#22c55e', power: 1.8, wheelR: 16, cost: 6000, owned: false },
+        { id: 'monster', name: 'Monster Truck 4x4', icon: '🚚', type: 'car', color: '#9333ea', power: 1.75, wheelR: 24, cost: 7000, owned: false },
+        { id: 'jcb', name: 'JCB 3DX Excavator', icon: '🚜', type: 'car', color: '#eab308', power: 1.7, wheelR: 21, cost: 8000, owned: false },
+        { id: 'formula', name: 'Formula F1 Racer', icon: '🏎️', type: 'car', color: '#dc2626', power: 2.0, wheelR: 15, cost: 9000, owned: false },
+        { id: 'moonlander', name: 'ISRO Moon Rover', icon: '🛸', type: 'car', color: '#facc15', power: 1.9, wheelR: 18, cost: 10000, owned: false }
     ];
-    let currentVehicle = vehicles[1]; // Default Royal Bullet
+    let currentVehicle = vehicles[0];
 
-    // Maps from Hill Climb Racing & Screenshots
+    // 24 Hill Climb Racing Maps (Buyable with Coins)
     const maps = [
-        { id: 'country', name: 'Countryside', tag: 'Green Hills', skyTop: '#38bdf8', skyBot: '#bae6fd', hillBg: '#86efac', ground: '#b45309', topEdge: '#65a30d', gravity: 0.42 },
-        { id: 'canyon', name: 'Red Canyon', tag: 'Desert Cliffs', skyTop: '#0284c7', skyBot: '#fde047', hillBg: '#fdba74', ground: '#9a3412', topEdge: '#ea580c', gravity: 0.42 },
-        { id: 'moon', name: 'Moon Crater', tag: 'Low Gravity', skyTop: '#020617', skyBot: '#1e293b', hillBg: '#334155', ground: '#475569', topEdge: '#94a3b8', gravity: 0.18 },
-        { id: 'haunted', name: 'Haunted Night', tag: 'Spooky Hills', skyTop: '#422006', skyBot: '#ca8a04', hillBg: '#713f12', ground: '#292524', topEdge: '#d97706', gravity: 0.42 },
-        { id: 'alien', name: 'Alien Planet', tag: 'Neon World', skyTop: '#1e1b4b', skyBot: '#6d28d9', hillBg: '#4c1d95', ground: '#312e81', topEdge: '#38bdf8', gravity: 0.34 }
+        { id: 'country', name: 'Countryside', icon: '🌾', skyTop: '#38bdf8', skyBot: '#bae6fd', hillBg: '#86efac', ground: '#b45309', topEdge: '#65a30d', gravity: 0.42, cost: 0, owned: true },
+        { id: 'desert', name: 'Desert Canyon', icon: '🏜️', skyTop: '#0284c7', skyBot: '#fde047', hillBg: '#fdba74', ground: '#9a3412', topEdge: '#ea580c', gravity: 0.42, cost: 500, owned: false },
+        { id: 'arctic', name: 'Arctic Snow', icon: '❄️', skyTop: '#0369a1', skyBot: '#e0f2fe', hillBg: '#bae6fd', ground: '#cbd5e1', topEdge: '#ffffff', gravity: 0.40, cost: 1000, owned: false },
+        { id: 'highway', name: 'Indian Highway', icon: '🛣️', skyTop: '#2563eb', skyBot: '#93c5fd', hillBg: '#4ade80', ground: '#334155', topEdge: '#facc15', gravity: 0.42, cost: 1500, owned: false },
+        { id: 'cave', name: 'Dark Cave', icon: '🦇', skyTop: '#090d16', skyBot: '#1e293b', hillBg: '#0f172a', ground: '#475569', topEdge: '#94a3b8', gravity: 0.42, cost: 2000, owned: false },
+        { id: 'moon', name: 'Moon Crater', icon: '🌕', skyTop: '#020617', skyBot: '#0f172a', hillBg: '#1e293b', ground: '#475569', topEdge: '#cbd5e1', gravity: 0.16, cost: 2500, owned: false },
+        { id: 'mars', name: 'Red Mars', icon: '🪐', skyTop: '#450a0a', skyBot: '#991b1b', hillBg: '#7f1d1d', ground: '#b91c1c', topEdge: '#f87171', gravity: 0.25, cost: 3000, owned: false },
+        { id: 'alien', name: 'Alien Planet', icon: '👽', skyTop: '#1e1b4b', skyBot: '#6d28d9', hillBg: '#4c1d95', ground: '#312e81', topEdge: '#38bdf8', gravity: 0.34, cost: 3500, owned: false },
+        { id: 'haunted', name: 'Haunted Forest', icon: '🎃', skyTop: '#422006', skyBot: '#ca8a04', hillBg: '#713f12', ground: '#292524', topEdge: '#d97706', gravity: 0.42, cost: 4000, owned: false },
+        { id: 'volcano', name: 'Lava Volcano', icon: '🌋', skyTop: '#7f1d1d', skyBot: '#ea580c', hillBg: '#9a3412', ground: '#1c1917', topEdge: '#ef4444', gravity: 0.42, cost: 4500, owned: false },
+        { id: 'mudpool', name: 'Village Mudpool', icon: '🐖', skyTop: '#0284c7', skyBot: '#fde68a', hillBg: '#a3e635', ground: '#451a03', topEdge: '#78350f', gravity: 0.44, cost: 5000, owned: false },
+        { id: 'beach', name: 'Goa Beach', icon: '🏖️', skyTop: '#0ea5e9', skyBot: '#fef08a', hillBg: '#38bdf8', ground: '#eab308', topEdge: '#fef08a', gravity: 0.42, cost: 5500, owned: false },
+        { id: 'forest', name: 'Jungle Safari', icon: '🌲', skyTop: '#065f46', skyBot: '#6ee7b7', hillBg: '#047857', ground: '#78350f', topEdge: '#10b981', gravity: 0.42, cost: 6000, owned: false },
+        { id: 'mountain', name: 'Himalaya Peaks', icon: '🏔️', skyTop: '#1d4ed8', skyBot: '#dbeafe', hillBg: '#93c5fd', ground: '#334155', topEdge: '#f8fafc', gravity: 0.38, cost: 6500, owned: false },
+        { id: 'night', name: 'Mumbai Night', icon: '🌃', skyTop: '#090d16', skyBot: '#1e1b4b', hillBg: '#312e81', ground: '#1e293b', topEdge: '#facc15', gravity: 0.42, cost: 7000, owned: false },
+        { id: 'rooftops', name: 'City Rooftops', icon: '🏙️', skyTop: '#38bdf8', skyBot: '#e0f2fe', hillBg: '#94a3b8', ground: '#475569', topEdge: '#ef4444', gravity: 0.42, cost: 7500, owned: false },
+        { id: 'junkyard', name: 'Scrap Junkyard', icon: '⚙️', skyTop: '#713f12', skyBot: '#fde047', hillBg: '#a16207', ground: '#3f3f46', topEdge: '#d97706', gravity: 0.42, cost: 8000, owned: false },
+        { id: 'construction', name: 'Mega Bridge', icon: '🏗️', skyTop: '#0284c7', skyBot: '#bae6fd', hillBg: '#64748b', ground: '#334155', topEdge: '#f97316', gravity: 0.42, cost: 8500, owned: false },
+        { id: 'bootcamp', name: 'Army Bootcamp', icon: '🎖️', skyTop: '#3f6212', skyBot: '#bef264', hillBg: '#4d7c0f', ground: '#365314', topEdge: '#84cc16', gravity: 0.42, cost: 9000, owned: false },
+        { id: 'nuclear', name: 'Reactor Zone', icon: '☢️', skyTop: '#14532d', skyBot: '#86efac', hillBg: '#166534', ground: '#1e293b', topEdge: '#22c55e', gravity: 0.40, cost: 9500, owned: false },
+        { id: 'ragnarok', name: 'Ragnarok Fire', icon: '🔥', skyTop: '#450a0a', skyBot: '#f97316', hillBg: '#7c2d12', ground: '#18181b', topEdge: '#facc15', gravity: 0.42, cost: 10000, owned: false },
+        { id: 'seasons', name: 'Autumn Valley', icon: '🍁', skyTop: '#ea580c', skyBot: '#fed7aa', hillBg: '#fb923c', ground: '#7c2d12', topEdge: '#f97316', gravity: 0.42, cost: 11000, owned: false },
+        { id: 'rainbow', name: 'Rainbow Sky', icon: '🌈', skyTop: '#ec4899', skyBot: '#38bdf8', hillBg: '#a855f7', ground: '#fef08a', topEdge: '#f43f5e', gravity: 0.35, cost: 12000, owned: false },
+        { id: 'space', name: 'Space Station', icon: '🚀', skyTop: '#000000', skyBot: '#0f172a', hillBg: '#1e293b', ground: '#334155', topEdge: '#38bdf8', gravity: 0.20, cost: 15000, owned: false }
     ];
     let currentMap = maps[0];
 
-    function renderMenuCards() {
-        document.getElementById('vehicle-cards').innerHTML = vehicles.map(v => `
-            <div class="select-card ${currentVehicle.id === v.id ? 'active' : ''}" onclick="pickVehicle('${v.id}')">
-                <h4>${v.name}</h4>
-                <span>${v.tag}</span>
-            </div>
-        `).join('');
+    function switchTab(tab) {
+        activeTab = tab;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + tab).classList.add('active');
 
-        document.getElementById('map-cards').innerHTML = maps.map(m => `
-            <div class="select-card ${currentMap.id === m.id ? 'active' : ''}" onclick="pickMap('${m.id}')">
-                <h4>${m.name}</h4>
-                <span>${m.tag}</span>
-            </div>
-        `).join('');
+        const carousel = document.getElementById('carousel-container');
+        const tune = document.getElementById('tune-container');
+        const earn = document.getElementById('earn-container');
+        const heading = document.getElementById('tab-heading');
+
+        carousel.classList.add('hidden');
+        tune.classList.add('hidden');
+        earn.classList.add('hidden');
+
+        if (tab === 'vehicles') {
+            heading.innerText = '🏍️ SELECT OR BUY VEHICLES (16 INDIAN BIKES & CARS)';
+            carousel.classList.remove('hidden');
+            renderVehicles();
+        } else if (tab === 'maps') {
+            heading.innerText = '🗺️ SELECT OR BUY STAGES (24 HILL CLIMB MAPS)';
+            carousel.classList.remove('hidden');
+            renderMaps();
+        } else if (tab === 'tune') {
+            heading.innerText = '🔧 UPGRADE ' + currentVehicle.name.toUpperCase();
+            tune.classList.remove('hidden');
+            renderTune();
+        } else if (tab === 'earn') {
+            heading.innerText = '🎁 EARN REAL CASH & FREE COINS';
+            earn.classList.remove('hidden');
+        }
     }
-    function pickVehicle(id) { currentVehicle = vehicles.find(v => v.id === id); renderMenuCards(); }
-    function pickMap(id) { currentMap = maps.find(m => m.id === id); renderMenuCards(); }
-    renderMenuCards();
 
-    // Physics State
+    function renderVehicles() {
+        const box = document.getElementById('carousel-container');
+        box.innerHTML = vehicles.map(v => {
+            const isSel = currentVehicle.id === v.id;
+            let btnHtml = '';
+            if (v.owned) {
+                btnHtml = isSel
+                    ? `<button class="card-action-btn btn-equipped">✔ SELECTED</button>`
+                    : `<button class="card-action-btn btn-select" onclick="selectVehicle('${v.id}')">SELECT</button>`;
+            } else {
+                btnHtml = `<button class="card-action-btn btn-buy" onclick="buyVehicle('${v.id}')">🪙 ${v.cost}</button>`;
+            }
+            return `
+                <div class="item-card ${isSel ? 'selected' : ''} ${!v.owned ? 'locked' : ''}" onclick="${v.owned ? `selectVehicle('${v.id}')` : `buyVehicle('${v.id}')`}">
+                    <div class="card-icon">${v.icon}</div>
+                    <div class="card-title">${v.name}</div>
+                    <div class="card-sub">Power: ${Math.round(v.power * 100)}% | ${v.type.toUpperCase()}</div>
+                    ${btnHtml}
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderMaps() {
+        const box = document.getElementById('carousel-container');
+        box.innerHTML = maps.map(m => {
+            const isSel = currentMap.id === m.id;
+            let btnHtml = '';
+            if (m.owned) {
+                btnHtml = isSel
+                    ? `<button class="card-action-btn btn-equipped">✔ SELECTED</button>`
+                    : `<button class="card-action-btn btn-select" onclick="selectMap('${m.id}')">SELECT</button>`;
+            } else {
+                btnHtml = `<button class="card-action-btn btn-buy" onclick="buyMap('${m.id}')">🪙 ${m.cost}</button>`;
+            }
+            return `
+                <div class="item-card ${isSel ? 'selected' : ''} ${!m.owned ? 'locked' : ''}" onclick="${m.owned ? `selectMap('${m.id}')` : `buyMap('${m.id}')`}">
+                    <div class="card-icon">${m.icon}</div>
+                    <div class="card-title">${m.name}</div>
+                    <div class="card-sub">Gravity: ${m.gravity < 0.3 ? 'Low (Space)' : 'Normal'}</div>
+                    ${btnHtml}
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderTune() {
+        const items = [
+            { key: 'engine', name: 'ENGINE POWER', icon: '⚡' },
+            { key: 'susp', name: 'SUSPENSION', icon: '🔩' },
+            { key: 'grip', name: 'TYRE GRIP', icon: '🛞' },
+            { key: 'fuel', name: 'FUEL TANK', icon: '⛽' }
+        ];
+        document.getElementById('tune-container').innerHTML = items.map(it => {
+            const cost = baseCosts[it.key] * upgrades[it.key];
+            return `
+                <div class="tune-box">
+                    <div style="font-size:26px;">${it.icon}</div>
+                    <h4>${it.name}</h4>
+                    <div class="tune-lvl">Level ${upgrades[it.key]} / 15</div>
+                    <button class="card-action-btn btn-buy" onclick="buyUpgrade('${it.key}')">🪙 ${cost}</button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function selectVehicle(id) {
+        currentVehicle = vehicles.find(v => v.id === id);
+        syncUI();
+        renderVehicles();
+    }
+
+    function buyVehicle(id) {
+        const v = vehicles.find(x => x.id === id);
+        if (coins >= v.cost) {
+            coins -= v.cost;
+            v.owned = true;
+            currentVehicle = v;
+            syncUI();
+            renderVehicles();
+        } else {
+            alert(`Not enough coins! Need 🪙 ${v.cost} to unlock ${v.name}.`);
+        }
+    }
+
+    function selectMap(id) {
+        currentMap = maps.find(m => m.id === id);
+        syncUI();
+        renderMaps();
+    }
+
+    function buyMap(id) {
+        const m = maps.find(x => x.id === id);
+        if (coins >= m.cost) {
+            coins -= m.cost;
+            m.owned = true;
+            currentMap = m;
+            syncUI();
+            renderMaps();
+        } else {
+            alert(`Not enough coins! Need 🪙 ${m.cost} to unlock ${m.name}.`);
+        }
+    }
+
+    function buyUpgrade(type) {
+        const cost = baseCosts[type] * upgrades[type];
+        if (coins >= cost) {
+            coins -= cost;
+            upgrades[type]++;
+            syncUI();
+            renderTune();
+        } else {
+            alert(`Need 🪙 ${cost} coins to upgrade!`);
+        }
+    }
+
+    function watchAd() {
+        alert('Playing Google AdMob Rewarded Ad...');
+        setTimeout(() => {
+            cash += 0.25;
+            syncUI();
+            alert('$0.25 added to your cash wallet!');
+        }, 1000);
+    }
+
+    function claimFreeCoins() {
+        coins += 1000;
+        syncUI();
+        alert('+1,000 Coins added!');
+    }
+
+    function withdraw() {
+        const upi = document.getElementById('upi-input').value.trim();
+        if (!upi) return alert('Please enter your UPI ID!');
+        if (cash < 10) return alert('Minimum cashout threshold is $10.00');
+        alert(`$${cash.toFixed(2)} payout request submitted to ${upi}!`);
+        cash = 0; syncUI();
+    }
+
+    function syncUI() {
+        document.getElementById('menu-coins').innerText = coins.toLocaleString();
+        document.getElementById('hud-coins').innerText = coins.toLocaleString();
+        document.getElementById('menu-diamonds').innerText = diamonds;
+        document.getElementById('hud-diamonds').innerText = diamonds;
+        document.getElementById('menu-cash').innerText = cash.toFixed(2);
+        document.getElementById('lbl-selected-veh').innerText = currentVehicle.name;
+        document.getElementById('lbl-selected-map').innerText = currentMap.name;
+        document.getElementById('hud-dist').innerText = distance;
+        document.getElementById('nitro-count').innerText = nitros;
+        document.getElementById('fuel-fill').style.width = Math.max(0, (fuel / maxFuel) * 100) + '%';
+        document.getElementById('progress-fill').style.width = Math.min(100, (distance % 1000) / 10) + '%';
+    }
+
+    // ================= GAMEPLAY ENGINE =================
     const car = { x: 180, y: 200, vx: 0, vy: 0, angle: 0, vAngle: 0, wheelRot: 0 };
     let cameraX = 0, terrain = [], items = [];
     const keys = { gas: false, brake: false };
@@ -509,7 +727,7 @@
     function buildLevel() {
         terrain = []; items = [];
         let y = 470, slope = 0;
-        for (let x = -200; x <= 50000; x += 35) {
+        for (let x = -200; x <= 60000; x += 35) {
             if (x > 350) {
                 slope += (Math.random() - 0.5) * 0.48;
                 slope = Math.max(-0.68, Math.min(0.68, slope));
@@ -518,17 +736,14 @@
             }
             terrain.push({ x, y });
 
-            // Coins (5, 25, 100, 500 like screenshot)
             if (x > 400 && x % 140 === 0 && Math.random() > 0.2) {
-                const vals = [25, 25, 100, 500];
+                const vals = [25, 100, 500];
                 const val = vals[Math.floor(Math.random() * vals.length)];
                 items.push({ x, y: y - 34, type: 'coin', val, got: false });
             }
-            // Diamonds
             if (x > 900 && x % 1120 === 0) {
                 items.push({ x, y: y - 42, type: 'diamond', got: false });
             }
-            // Red Fuel Cans
             if (x > 1100 && x % 1400 === 0) {
                 items.push({ x, y: y - 36, type: 'fuel', got: false });
             }
@@ -545,7 +760,6 @@
         return 480;
     }
 
-    // Keyboard & Pedal Bindings
     window.addEventListener('keydown', e => {
         if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.gas = true;
         if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.brake = true;
@@ -569,38 +783,13 @@
     bindPedal('btn-gas', 'gas');
     bindPedal('btn-brake', 'brake');
 
-    function syncUI() {
-        document.getElementById('hud-coins').innerText = coins.toLocaleString();
-        document.getElementById('menu-coins').innerText = coins.toLocaleString();
-        document.getElementById('modal-coins').innerText = coins.toLocaleString();
-        document.getElementById('hud-diamonds').innerText = diamonds;
-        document.getElementById('menu-diamonds').innerText = diamonds;
-        document.getElementById('menu-cash').innerText = cash.toFixed(2);
-        document.getElementById('modal-cash').innerText = cash.toFixed(2);
-        document.getElementById('hud-dist').innerText = distance;
-        document.getElementById('nitro-count').innerText = nitros;
-
-        document.getElementById('fuel-fill').style.width = Math.max(0, (fuel / maxFuel) * 100) + '%';
-        document.getElementById('progress-fill').style.width = Math.min(100, (distance % 1000) / 10) + '%';
-
-        // Update upgrade buttons dynamically (500, 1000, 1500, 2000...)
-        ['engine', 'susp', 'grip', 'fuel'].forEach(k => {
-            document.getElementById('lvl-' + k).innerText = upgrades[k];
-            const cost = baseCosts[k] * upgrades[k];
-            document.getElementById('btn-upg-' + k).innerText = '🪙 ' + cost;
-        });
-    }
-
     function startGame() {
         buildLevel();
         car.x = 180; car.y = getGroundY(180) - 26;
         car.vx = 0; car.vy = 0; car.angle = 0; car.vAngle = 0;
         maxFuel = 100 + (upgrades.fuel - 1) * 30;
         fuel = maxFuel;
-        distance = 0;
-        nitros = 3;
-        nitroTimer = 0;
-        airFrames = 0;
+        distance = 0; nitros = 3; nitroTimer = 0; airFrames = 0;
         state = 'PLAYING';
 
         document.getElementById('menu-screen').classList.add('hidden');
@@ -614,51 +803,16 @@
         document.getElementById('gameover-screen').classList.add('hidden');
         document.getElementById('hud-layer').classList.add('hidden');
         document.getElementById('menu-screen').classList.remove('hidden');
+        switchTab(activeTab);
         syncUI();
-    }
-
-    function togglePause() {
-        if (state === 'PLAYING') state = 'PAUSED';
-        else if (state === 'PAUSED') state = 'PLAYING';
     }
 
     function activateNitro() {
         if (state === 'PLAYING' && nitros > 0 && nitroTimer <= 0) {
             nitros--;
-            nitroTimer = 60; // 1 second turbo boost
+            nitroTimer = 60;
             syncUI();
         }
-    }
-
-    function openModal(id) { syncUI(); document.getElementById(id).classList.remove('hidden'); }
-    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); syncUI(); }
-
-    function buyUpgrade(type) {
-        const cost = baseCosts[type] * upgrades[type];
-        if (coins >= cost) {
-            coins -= cost;
-            upgrades[type]++;
-            syncUI();
-        } else {
-            alert(`Need 🪙 ${cost} coins to upgrade!`);
-        }
-    }
-
-    function watchAd() {
-        alert('Loading Rewarded Ad...');
-        setTimeout(() => {
-            cash += 0.25;
-            syncUI();
-            alert('$0.25 added to your wallet!');
-        }, 1000);
-    }
-
-    function withdraw() {
-        const upi = document.getElementById('upi-input').value.trim();
-        if (!upi) return alert('Enter valid UPI ID!');
-        if (cash < 10) return alert('Minimum cashout is $10.00');
-        alert(`$${cash.toFixed(2)} withdrawal sent to ${upi}!`);
-        cash = 0; syncUI();
     }
 
     function gameOver(reason) {
@@ -687,7 +841,6 @@
         }
 
         if (car.y >= groundY - 22) {
-            // Check Air Time Reward on Landing
             if (airFrames > 45) {
                 const bonus = airFrames > 90 ? 300 : 50;
                 coins += bonus;
@@ -701,7 +854,6 @@
             car.y = groundY - 22;
             car.vy = 0;
 
-            // Driver Down Check
             if (Math.abs(car.angle) > 1.85) return gameOver('DRIVER DOWN!');
 
             car.angle += (slopeAngle - car.angle) * (0.22 + upgrades.susp * 0.02);
@@ -729,14 +881,12 @@
 
         distance = Math.max(distance, Math.floor((car.x - 180) / 14));
 
-        // Update Analog Needles (RPM & BOOST)
         const speedRatio = Math.min(1, Math.abs(car.vx) / 16);
         const rpmAngle = -110 + (keys.gas ? Math.max(speedRatio, 0.65) : speedRatio) * 210;
         const boostAngle = -110 + (nitroTimer > 0 ? 1 : speedRatio * 0.85) * 210;
         document.getElementById('rpm-needle').style.transform = `translateX(-50%) rotate(${rpmAngle}deg)`;
         document.getElementById('boost-needle').style.transform = `translateX(-50%) rotate(${boostAngle}deg)`;
 
-        // Collect Pickups
         for (let it of items) {
             if (!it.got && Math.hypot(car.x - it.x, car.y - it.y) < 52) {
                 it.got = true;
@@ -751,14 +901,12 @@
     }
 
     function draw() {
-        // Sky Gradient
         const sky = ctx.createLinearGradient(0, 0, 0, canvas.height);
         sky.addColorStop(0, currentMap.skyTop);
         sky.addColorStop(1, currentMap.skyBot);
         ctx.fillStyle = sky;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Background Rounded Hills (Like Hill Climb Countryside)
         ctx.fillStyle = currentMap.hillBg;
         ctx.beginPath();
         ctx.moveTo(0, 720);
@@ -773,7 +921,6 @@
         ctx.save();
         ctx.translate(-cameraX, 0);
 
-        // Foreground Terrain
         ctx.beginPath();
         let started = false;
         for (let i = 0; i < terrain.length; i++) {
@@ -792,7 +939,6 @@
         ctx.strokeStyle = currentMap.topEdge;
         ctx.stroke();
 
-        // Pickups (Coins with Value Numbers, Diamonds, Red Fuel Cans)
         for (let it of items) {
             if (it.got || it.x < cameraX - 60 || it.x > cameraX + 1350) continue;
             if (it.type === 'coin') {
@@ -824,12 +970,10 @@
             }
         }
 
-        // Draw Vehicle + Rider (Newton Bill Style Cap)
         ctx.save();
         ctx.translate(car.x, car.y);
         ctx.rotate(car.angle);
 
-        // Nitro Flame
         if (nitroTimer > 0) {
             ctx.fillStyle = '#38bdf8';
             ctx.beginPath();
@@ -838,54 +982,46 @@
         }
 
         if (currentVehicle.type === 'bike') {
-            // Rider Body & Red Cap
             ctx.fillStyle = '#b91c1c';
             ctx.fillRect(-10, -34, 14, 18);
-            ctx.fillStyle = '#fde68a'; // Head
+            ctx.fillStyle = '#fde68a';
             ctx.beginPath(); ctx.arc(-2, -40, 9, 0, Math.PI * 2); ctx.fill();
             ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke();
-            ctx.fillStyle = '#ef4444'; // Cap
+            ctx.fillStyle = '#ef4444';
             ctx.fillRect(-11, -48, 16, 6);
 
-            // Bike Chassis (Splendor / Bullet / Sports)
             ctx.strokeStyle = currentVehicle.color;
             ctx.lineWidth = 6;
             ctx.beginPath();
             ctx.moveTo(-24, 6); ctx.lineTo(-6, -14); ctx.lineTo(16, -16); ctx.lineTo(26, 6);
             ctx.stroke();
 
-            // Petrol Tank
             ctx.fillStyle = currentVehicle.color;
             ctx.beginPath(); ctx.ellipse(4, -18, 14, 7, 0, 0, Math.PI * 2); ctx.fill();
             ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke();
 
-            // Chrome Exhaust for Bullet
             if (currentVehicle.id === 'bullet') {
                 ctx.fillStyle = '#cbd5e1';
                 ctx.fillRect(-32, 0, 26, 5);
             }
         } else {
-            // 4-Wheeler Offroad Buggy
             ctx.fillStyle = '#fde68a';
             ctx.beginPath(); ctx.arc(-4, -34, 10, 0, Math.PI * 2); ctx.fill();
             ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke();
             ctx.fillStyle = '#ef4444';
             ctx.fillRect(-14, -43, 18, 6);
 
-            // Roll Cage
             ctx.strokeStyle = '#000'; ctx.lineWidth = 4;
             ctx.beginPath();
             ctx.moveTo(-24, -20); ctx.lineTo(-10, -44); ctx.lineTo(12, -44); ctx.lineTo(26, -20);
             ctx.stroke();
 
-            // Body
             ctx.fillStyle = currentVehicle.color;
             ctx.fillRect(-40, -22, 80, 20);
             ctx.lineWidth = 3; ctx.strokeStyle = '#000';
             ctx.strokeRect(-40, -22, 80, 20);
         }
 
-        // Wheels with Spokes
         const wOffset = currentVehicle.type === 'bike' ? 25 : 27;
         [-wOffset, wOffset].forEach(wx => {
             ctx.save();
@@ -912,6 +1048,7 @@
         requestAnimationFrame(loop);
     }
 
+    switchTab('vehicles');
     syncUI();
     loop();
 </script>
