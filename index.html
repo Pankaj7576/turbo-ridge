@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Turbo Ridge: Offroad Climb</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+        body {
+            background-color: #0b0f19;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+        /* 16:9 Responsive Aspect Ratio Container */
+        #game-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 56.25vw; /* 16:9 ratio */
+            max-height: 100vh;
+            max-width: 177.78vh; /* 16:9 ratio */
+            background: #111;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+            border: 2px solid #2c3e50;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        /* HUD Overlay */
+        .hud {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .hud-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .badge {
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+        .fuel-box {
+            width: 160px;
+            height: 18px;
+            background: #1e293b;
+            border-radius: 9px;
+            overflow: hidden;
+            border: 2px solid #fff;
+        }
+        #fuel-fill {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444, #eab308, #22c55e);
+            transition: width 0.1s linear;
+        }
+        .hud-btn {
+            pointer-events: auto;
+            background: #f59e0b;
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 4px 0 #b45309;
+        }
+        .hud-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #b45309; }
+
+        /* Touch Controls */
+        .pedals {
+            position: absolute;
+            bottom: 20px;
+            left: 25px;
+            right: 25px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .pedal {
+            pointer-events: auto;
+            width: 110px;
+            height: 75px;
+            border-radius: 14px;
+            border: 3px solid rgba(255,255,255,0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-weight: 900;
+            font-size: 18px;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.5);
+            transition: transform 0.05s;
+        }
+        .pedal-brake { background: rgba(239, 68, 68, 0.75); }
+        .pedal-gas { background: rgba(34, 197, 94, 0.75); }
+        .pedal:active, .pedal.pressed { transform: scale(0.92); filter: brightness(1.2); }
+
+        /* Screens (Menu & Game Over) */
+        .overlay-screen {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(30, 41, 59, 0.92), rgba(11, 15, 25, 0.98));
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            text-align: center;
+            padding: 20px;
+        }
+        .title {
+            font-size: clamp(32px, 5vw, 56px);
+            font-weight: 900;
+            color: #fbbf24;
+            text-shadow: 0 4px 0 #b45309, 0 10px 25px rgba(0,0,0,0.8);
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: #94a3b8;
+            font-size: clamp(14px, 2vw, 18px);
+            margin-bottom: 28px;
+        }
+        .btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        .action-btn {
+            padding: 14px 32px;
+            font-size: 18px;
+            font-weight: 800;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: transform 0.1s;
+        }
+        .action-btn:active { transform: translateY(3px); }
+        .btn-play { background: #22c55e; box-shadow: 0 5px 0 #15803d; }
+        .btn-garage { background: #3b82f6; box-shadow: 0 5px 0 #1d4ed8; }
+        .btn-earn { background: #a855f7; box-shadow: 0 5px 0 #7e22ce; }
+
+        /* Modals */
+        .modal {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1e293b;
+            border: 3px solid #fbbf24;
+            border-radius: 18px;
+            padding: 25px;
+            width: 90%;
+            max-width: 460px;
+            z-index: 20;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+            text-align: center;
+        }
+        .modal h2 { color: #fbbf24; margin-bottom: 10px; font-size: 24px; }
+        .upgrade-item {
+            background: #0f172a;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #334155;
+        }
+        .modal input {
+            width: 100%;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: #fff;
+            font-size: 15px;
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div id="game-wrapper">
+    <canvas id="gameCanvas" width="1280" height="720"></canvas>
+
+    <!-- HUD -->
+    <div id="hud" class="hud hidden">
+        <div class="hud-group">
+            <div class="badge">🪙 <span id="hud-coins">0</span></div>
+            <div class="badge">💵 $<span id="hud-cash">0.25</span></div>
+            <div class="badge">📏 <span id="hud-dist">0</span>m</div>
+        </div>
+        <div class="hud-group">
+            <div class="badge">
+                ⛽ <div class="fuel-box"><div id="fuel-fill"></div></div>
+            </div>
+            <button class="hud-btn" onclick="togglePause()">⏸ PAUSE</button>
+        </div>
+    </div>
+
+    <!-- Pedals -->
+    <div id="pedals" class="pedals hidden">
+        <div id="btn-brake" class="pedal pedal-brake">BRAKE<span style="font-size:11px;opacity:0.8">◀ / A</span></div>
+        <div id="btn-gas" class="pedal pedal-gas">GAS<span style="font-size:11px;opacity:0.8">▶ / D</span></div>
+    </div>
+
+    <!-- Main Menu -->
+    <div id="menu-screen" class="overlay-screen">
+        <div class="title">TURBO RIDGE</div>
+        <div class="subtitle">Offroad Physics Climb & Cash Rewards</div>
+        <div class="badge" style="margin-bottom: 24px;">
+            🪙 Coins: <span id="menu-coins">0</span> &nbsp;|&nbsp; 💵 Wallet: $<span id="menu-cash">0.25</span>
+        </div>
+        <div class="btn-row">
+            <button class="action-btn btn-play" onclick="startGame()">▶ PLAY GAME</button>
+            <button class="action-btn btn-garage" onclick="openModal('garage-modal')">🔧 GARAGE</button>
+            <button class="action-btn btn-earn" onclick="openModal('earn-modal')">🎁 EARN & CASHOUT</button>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameover-screen" class="overlay-screen hidden">
+        <div class="title" style="color: #ef4444; text-shadow: 0 4px 0 #991b1b;">OUT OF FUEL / CRASH!</div>
+        <div class="subtitle" id="gameover-reason">You ran out of fuel!</div>
+        <div class="badge" style="margin-bottom: 24px; font-size: 20px;">
+            📏 Distance: <span id="end-dist">0</span>m &nbsp;|&nbsp; 🪙 Total Coins: <span id="end-coins">0</span>
+        </div>
+        <div class="btn-row">
+            <button class="action-btn btn-play" onclick="startGame()">🔄 PLAY AGAIN</button>
+            <button class="action-btn btn-garage" onclick="showMenu()">🏠 MAIN MENU</button>
+        </div>
+    </div>
+
+    <!-- Garage Modal -->
+    <div id="garage-modal" class="modal hidden">
+        <h2>🔧 VEHICLE GARAGE</h2>
+        <p style="color:#94a3b8; font-size:14px;">Coins Available: 🪙 <strong id="garage-coins" style="color:#fbbf24;">0</strong></p>
+        <div class="upgrade-item">
+            <div style="text-align:left;"><strong>Engine Power</strong><br><small style="color:#94a3b8;">Level <span id="lvl-engine">1</span></small></div>
+            <button class="hud-btn" onclick="buyUpgrade('engine')">Upgrade (🪙 100)</button>
+        </div>
+        <div class="upgrade-item">
+            <div style="text-align:left;"><strong>Suspension & Grip</strong><br><small style="color:#94a3b8;">Level <span id="lvl-grip">1</span></small></div>
+            <button class="hud-btn" onclick="buyUpgrade('grip')">Upgrade (🪙 100)</button>
+        </div>
+        <div class="upgrade-item">
+            <div style="text-align:left;"><strong>Fuel Tank Capacity</strong><br><small style="color:#94a3b8;">Level <span id="lvl-fuel">1</span></small></div>
+            <button class="hud-btn" onclick="buyUpgrade('fuel')">Upgrade (🪙 100)</button>
+        </div>
+        <button class="action-btn btn-play" style="margin-top:12px; padding:10px 24px; font-size:15px;" onclick="closeModals()">DONE</button>
+    </div>
+
+    <!-- Earn & Cashout Modal -->
+    <div id="earn-modal" class="modal hidden">
+        <h2>🎁 REWARDS & PAYOUTS</h2>
+        <p style="color:#94a3b8; font-size:14px;">Watch sponsored ads or withdraw via UPI</p>
+        <div style="background:#0f172a; padding:14px; border-radius:10px; margin:12px 0; border:1px solid #334155;">
+            <div style="font-size:13px; color:#94a3b8;">Current Cash Balance</div>
+            <div style="font-size:28px; font-weight:900; color:#22c55e;">$<span id="modal-cash">0.25</span></div>
+        </div>
+        <button class="action-btn btn-earn" style="width:100%; font-size:15px; padding:12px;" onclick="watchAd()">📺 WATCH AD (+$0.25)</button>
+        <input type="text" id="upi-field" placeholder="Enter UPI ID (e.g. name@okicici) or PayPal">
+        <button class="action-btn btn-play" style="width:100%; font-size:15px; padding:12px;" onclick="withdrawCash()">💸 WITHDRAW (MIN $10.00)</button>
+        <button class="hud-btn" style="margin-top:14px; background:#475569; color:#fff; box-shadow:none;" onclick="closeModals()">CLOSE</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Game State
+    let state = 'MENU'; // MENU, PLAYING, PAUSED, GAMEOVER
+    let coins = 0;
+    let cash = 0.25;
+    let fuel = 100;
+    let maxFuel = 100;
+    let distance = 0;
+    let upgrades = { engine: 1, grip: 1, fuel: 1 };
+
+    // Car Physics Object
+    const car = {
+        x: 150, y: 200,
+        vx: 0, vy: 0,
+        angle: 0, vAngle: 0,
+        width: 84, height: 34,
+        onGround: false
+    };
+
+    let cameraX = 0;
+    let terrain = [];
+    let pickups = []; // coins & fuel cans
+    const keys = { gas: false, brake: false };
+
+    // Generate Hills, Coins, and Fuel Cans
+    function buildWorld() {
+        terrain = [];
+        pickups = [];
+        let y = 480;
+        let slope = 0;
+        for (let x = -200; x <= 40000; x += 40) {
+            if (x > 300) {
+                slope += (Math.random() - 0.5) * 0.45;
+                slope = Math.max(-0.65, Math.min(0.65, slope));
+                y += slope * 40;
+                y = Math.max(240, Math.min(620, y));
+            }
+            terrain.push({ x, y });
+
+            // Spawn Coins
+            if (x > 400 && x % 160 === 0 && Math.random() > 0.25) {
+                pickups.push({ x, y: y - 35, type: 'coin', collected: false });
+            }
+            // Spawn Fuel Cans every 1400px
+            if (x > 1000 && x % 1400 === 0) {
+                pickups.push({ x, y: y - 38, type: 'fuel', collected: false });
+            }
+        }
+    }
+
+    function getGroundY(x) {
+        for (let i = 0; i < terrain.length - 1; i++) {
+            if (x >= terrain[i].x && x <= terrain[i + 1].x) {
+                const t = (x - terrain[i].x) / (terrain[i + 1].x - terrain[i].x);
+                return terrain[i].y + t * (terrain[i + 1].y - terrain[i].y);
+            }
+        }
+        return 500;
+    }
+
+    // Controls
+    window.addEventListener('keydown', e => {
+        if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.gas = true;
+        if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.brake = true;
+    });
+    window.addEventListener('keyup', e => {
+        if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.gas = false;
+        if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.brake = false;
+    });
+
+    function bindPedal(id, keyName) {
+        const el = document.getElementById(id);
+        const start = e => { e.preventDefault(); keys[keyName] = true; el.classList.add('pressed'); };
+        const end = e => { e.preventDefault(); keys[keyName] = false; el.classList.remove('pressed'); };
+        el.addEventListener('mousedown', start);
+        el.addEventListener('touchstart', start, { passive: false });
+        el.addEventListener('mouseup', end);
+        el.addEventListener('mouseleave', end);
+        el.addEventListener('touchend', end);
+    }
+    bindPedal('btn-gas', 'gas');
+    bindPedal('btn-brake', 'brake');
+
+    // UI Sync
+    function updateUI() {
+        document.getElementById('hud-coins').innerText = coins;
+        document.getElementById('menu-coins').innerText = coins;
+        document.getElementById('garage-coins').innerText = coins;
+        document.getElementById('hud-cash').innerText = cash.toFixed(2);
+        document.getElementById('menu-cash').innerText = cash.toFixed(2);
+        document.getElementById('modal-cash').innerText = cash.toFixed(2);
+        document.getElementById('hud-dist').innerText = distance;
+        document.getElementById('fuel-fill').style.width = Math.max(0, (fuel / maxFuel) * 100) + '%';
+    }
+
+    function startGame() {
+        buildWorld();
+        car.x = 150;
+        car.y = getGroundY(150) - 30;
+        car.vx = 0; car.vy = 0;
+        car.angle = 0; car.vAngle = 0;
+        maxFuel = 100 + (upgrades.fuel - 1) * 25;
+        fuel = maxFuel;
+        distance = 0;
+        state = 'PLAYING';
+
+        document.getElementById('menu-screen').classList.add('hidden');
+        document.getElementById('gameover-screen').classList.add('hidden');
+        document.getElementById('hud').classList.remove('hidden');
+        document.getElementById('pedals').classList.remove('hidden');
+        updateUI();
+    }
+
+    function showMenu() {
+        state = 'MENU';
+        document.getElementById('gameover-screen').classList.add('hidden');
+        document.getElementById('hud').classList.add('hidden');
+        document.getElementById('pedals').classList.add('hidden');
+        document.getElementById('menu-screen').classList.remove('hidden');
+        updateUI();
+    }
+
+    function togglePause() {
+        if (state === 'PLAYING') state = 'PAUSED';
+        else if (state === 'PAUSED') state = 'PLAYING';
+    }
+
+    function openModal(id) {
+        updateUI();
+        document.getElementById(id).classList.remove('hidden');
+    }
+    function closeModals() {
+        document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
+        updateUI();
+    }
+
+    function buyUpgrade(type) {
+        if (coins >= 100) {
+            coins -= 100;
+            upgrades[type]++;
+            document.getElementById('lvl-' + type).innerText = upgrades[type];
+            updateUI();
+        } else {
+            alert('Need 100 Coins to upgrade! Drive further to collect more coins.');
+        }
+    }
+
+    function watchAd() {
+        alert('Playing Google AdMob Rewarded Ad (5s)...');
+        setTimeout(() => {
+            cash += 0.25;
+            updateUI();
+            alert('Reward Earned! $0.25 added to your wallet.');
+        }, 1200);
+    }
+
+    function withdrawCash() {
+        const upi = document.getElementById('upi-field').value.trim();
+        if (!upi) return alert('Please enter your UPI ID or PayPal email.');
+        if (cash < 10) return alert('Minimum payout threshold is $10.00. Keep earning!');
+        alert(`Withdrawal of $${cash.toFixed(2)} initiated to ${upi}!`);
+        cash = 0;
+        updateUI();
+    }
+
+    function triggerGameOver(reason) {
+        state = 'GAMEOVER';
+        document.getElementById('hud').classList.add('hidden');
+        document.getElementById('pedals').classList.add('hidden');
+        document.getElementById('gameover-reason').innerText = reason;
+        document.getElementById('end-dist').innerText = distance;
+        document.getElementById('end-coins').innerText = coins;
+        document.getElementById('gameover-screen').classList.remove('hidden');
+    }
+
+    // Physics Step
+    function update() {
+        if (state !== 'PLAYING') return;
+
+        const enginePower = 0.28 + (upgrades.engine - 1) * 0.06;
+        const gripFactor = 0.985 - (upgrades.grip - 1) * 0.002;
+
+        // Wheel positions
+        const frontX = car.x + Math.cos(car.angle) * 28;
+        const rearX = car.x - Math.cos(car.angle) * 28;
+        const groundCenter = getGroundY(car.x);
+        const slopeAngle = Math.atan2(getGroundY(frontX) - getGroundY(rearX), frontX - rearX);
+
+        // Gravity
+        car.vy += 0.42;
+
+        // Ground Interaction
+        if (car.y >= groundCenter - 22) {
+            car.y = groundCenter - 22;
+            car.vy = 0;
+            car.onGround = true;
+
+            // Check upside-down crash
+            if (Math.abs(car.angle) > 1.8) {
+                return triggerGameOver('Driver Crashed! Keep your wheels down.');
+            }
+
+            // Smooth alignment to slope
+            car.angle += (slopeAngle - car.angle) * 0.25;
+            car.vAngle = 0;
+
+            if (keys.gas) {
+                car.vx += Math.cos(car.angle) * enginePower;
+                fuel -= 0.07;
+            }
+            if (keys.brake) {
+                car.vx -= Math.cos(car.angle) * (enginePower * 0.75);
+                fuel -= 0.04;
+            }
+            car.vx *= gripFactor;
+        } else {
+            car.onGround = false;
+            // Air tilt controls
+            if (keys.gas) car.vAngle -= 0.006;
+            if (keys.brake) car.vAngle += 0.006;
+            car.angle += car.vAngle;
+            car.vAngle *= 0.94;
+            car.vx *= 0.995;
+        }
+
+        // Passive fuel burn
+        fuel -= 0.025;
+        if (fuel <= 0) {
+            return triggerGameOver('Out of Fuel! Grab red fuel cans along the road.');
+        }
+
+        car.x += car.vx;
+        car.y += car.vy;
+        if (car.x < 60) { car.x = 60; car.vx = 0; }
+
+        distance = Math.max(distance, Math.floor((car.x - 150) / 15));
+
+        // Check Pickups
+        for (let p of pickups) {
+            if (!p.collected && Math.hypot(car.x - p.x, car.y - p.y) < 55) {
+                p.collected = true;
+                if (p.type === 'coin') {
+                    coins += 25;
+                } else if (p.type === 'fuel') {
+                    fuel = maxFuel;
+                }
+            }
+        }
+
+        cameraX = car.x - 320;
+        updateUI();
+    }
+
+    // Render Loop
+    function draw() {
+        // Sky Gradient
+        const sky = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        sky.addColorStop(0, '#0284c7');
+        sky.addColorStop(0.6, '#38bdf8');
+        sky.addColorStop(1, '#fde047');
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Sun
+        ctx.fillStyle = 'rgba(254, 240, 138, 0.85)';
+        ctx.beginPath();
+        ctx.arc(1050, 130, 55, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Distant Parallax Mountains
+        ctx.fillStyle = '#0369a1';
+        ctx.beginPath();
+        ctx.moveTo(0, 720);
+        for (let sx = 0; sx <= 1360; sx += 80) {
+            const worldX = sx + cameraX * 0.25;
+            const mh = 340 + Math.sin(worldX * 0.003) * 90 + Math.cos(worldX * 0.007) * 40;
+            ctx.lineTo(sx, mh);
+        }
+        ctx.lineTo(1360, 720);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(-cameraX, 0);
+
+        // Draw Terrain
+        ctx.beginPath();
+        let started = false;
+        for (let i = 0; i < terrain.length; i++) {
+            const pt = terrain[i];
+            if (pt.x < cameraX - 100 || pt.x > cameraX + 1400) continue;
+            if (!started) { ctx.moveTo(pt.x, pt.y); started = true; }
+            else ctx.lineTo(pt.x, pt.y);
+        }
+        ctx.lineTo(cameraX + 1400, 800);
+        ctx.lineTo(cameraX - 100, 800);
+        ctx.closePath();
+
+        // Dirt Fill
+        ctx.fillStyle = '#78350f';
+        ctx.fill();
+
+        // Grass Top Border
+        ctx.lineWidth = 10;
+        ctx.strokeStyle = '#16a34a';
+        ctx.stroke();
+
+        // Draw Pickups (Coins & Fuel)
+        for (let p of pickups) {
+            if (p.collected || p.x < cameraX - 50 || p.x > cameraX + 1350) continue;
+            if (p.type === 'coin') {
+                ctx.fillStyle = '#fbbf24';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 15, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#b45309';
+                ctx.stroke();
+                ctx.fillStyle = '#78350f';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.fillText('$', p.x - 4, p.y + 5);
+            } else {
+                // Red Fuel Can
+                ctx.fillStyle = '#ef4444';
+                ctx.fillRect(p.x - 14, p.y - 18, 28, 34);
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(p.x - 14, p.y - 18, 28, 34);
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 11px sans-serif';
+                ctx.fillText('FUEL', p.x - 13, p.y + 4);
+            }
+        }
+
+        // Draw Offroad Buggy
+        ctx.save();
+        ctx.translate(car.x, car.y);
+        ctx.rotate(car.angle);
+
+        // Driver Head & Helmet
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.arc(-5, -34, 11, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#0f172a'; // Visor
+        ctx.fillRect(0, -38, 8, 6);
+
+        // Chassis Body
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.roundRect(-42, -24, 84, 22, 8);
+        ctx.fill();
+        ctx.strokeStyle = '#991b1b';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Roll Cage
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-22, -24);
+        ctx.lineTo(-10, -44);
+        ctx.lineTo(12, -44);
+        ctx.lineTo(24, -24);
+        ctx.stroke();
+
+        // Wheels
+        [-26, 26].forEach(wx => {
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.arc(wx, 6, 16, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // Rim
+            ctx.fillStyle = '#cbd5e1';
+            ctx.beginPath();
+            ctx.arc(wx, 6, 7, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        ctx.restore();
+        ctx.restore();
+    }
+
+    function loop() {
+        update();
+        draw();
+        requestAnimationFrame(loop);
+    }
+
+    updateUI();
+    loop();
+</script>
+</body>
+</html>
